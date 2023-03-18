@@ -1,0 +1,20 @@
+@typeparam TGridItem
+@if (ColumnManager != null && Visible)
+{
+    <div class="">
+        @foreach (var col in ColumnManager.Columns)
+        {
+            <div class="form-check form-check-inline">
+                <input type="checkbox" @bind="col.Visible" @bind:after="HandleChangeAsync" id="@col.ColumnId" class="form-check-input" />
+                <label class="form-check-label" for="@col.ColumnId">@col.FullTitle</label>
+            </div>
+        }
+    </div>
+}
+@code {
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public ColumnManager<TGridItem>? ColumnManager { get; set; }
+    [Parameter] public EventCallback SelectionChanged { get; set; }
+
+    private Task HandleChangeAsync() => SelectionChanged.InvokeAsync();
+}
