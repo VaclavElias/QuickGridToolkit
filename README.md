@@ -1,6 +1,6 @@
 # QuickGridToolkit
 
-This toolkit should help you to use the QuickGrid with more functionality, specifivally, if the QuickGrid is used in multiple places, with similar data structure, but with different columns.
+This toolkit should help you to use the QuickGrid with more functionality, specifically, if the QuickGrid is used in multiple places, with similar data structure, but with different columns.
 
 - **QuickGridToolkit** is a library with additional functionality for the [QuickGrid](https://aspnet.github.io/quickgridsamples/) with this functionality
   - [x] Add columns to the grid dynamically
