@@ -13,7 +13,7 @@ This toolkit should help you to use the QuickGrid with more functionality, speci
 
 Example:
 
-```csharp
+```razor
 <h1>Users</h1>
 <div class="my-3">
     <ColumnSelector ColumnManager="_columnManager" SelectionChanged="SelectionChangedAsync" />
