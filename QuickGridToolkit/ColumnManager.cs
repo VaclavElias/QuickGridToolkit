@@ -4,6 +4,8 @@ public class ColumnManager<TGridItem>
 {
     public readonly List<DynamicColumn<TGridItem>> Columns = new();
 
+    public readonly QuickGridColumns QuickGridColumns = new();
+
     /// <summary>
     /// Returns visible columns
     /// </summary>
@@ -40,6 +42,11 @@ public class ColumnManager<TGridItem>
     public void AddTemplateColumn(RenderFragment<TGridItem> childContent, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
     {
         Add(new() { ChildContent = childContent, ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
+    }
+
+    public void AddTemplateColumn2(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
+    {
+        Add(new() { ChildContent = QuickGridColumns.GetActionColumn(expression), ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
     }
 
     public void AddIndexColumn(string title = "#", Align align = Align.Center)

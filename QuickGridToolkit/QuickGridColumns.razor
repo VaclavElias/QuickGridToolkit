@@ -42,4 +42,23 @@
             }
         }
     </text>;
+
+    // Not working, eventually, I would like to pass a call back function instead of using Test()
+    // Also, it can't be static
+    // Error: System.InvalidOperationException: The render handle is not yet assigned. This happens because of @onclick handler
+    // Temporary solution, move the GetActionColumn to a "QuickGridPageBase" and inherid this page and so this method will be available for the child pages to be reused
+    public RenderFragment<TGridItem> GetActionColumn<TGridItem>(Expression<Func<TGridItem, object?>> property)
+    {
+        var propertyName = (property.Body as MemberExpression)?.Member.Name;
+        var propertyGetter = property.Compile();
+
+        return (context) => @<span @onclick="@(() => Test())" class="text-info">@propertyGetter(context)</span>;
+
+        void Test()
+        {
+            Console.WriteLine("Hello World");
+        }
+    }
+
+    public static RenderFragment MarkupColumn(MarkupString markupString) => @<text>@markupString</text>;
 }
