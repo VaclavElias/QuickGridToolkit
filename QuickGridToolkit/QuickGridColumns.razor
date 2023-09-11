@@ -11,34 +11,35 @@
             else if (col.ColumnType == typeof(ImageColumn<TGridItem>))
             {
                 <ImageColumn TGridItem="TGridItem" Title="@col.Title"
-                 Align="@col.Align"
-                 Class="@col.Class"
-                 Property="@col.Property" />
+                             Align="@col.Align"
+                             Class="@col.Class"
+                             Property="@col.Property" />
             }
             else if (col.ColumnType == typeof(TickColumn<TGridItem>))
             {
                 <TickColumn TGridItem="TGridItem" Title="@col.Title"
-                Align="@col.Align"
-                Class="@col.Class"
-                Property="@col.Property"
-                Sortable="true" />
+                            Align="@col.Align"
+                            Class="@col.Class"
+                            Property="@col.Property"
+                            Sortable="true" />
             }
             else if (col.ColumnType == typeof(TemplateColumn<TGridItem>))
             {
                 <TemplateColumn TGridItem="TGridItem" Title="@col.Title"
-                    Align="@col.Align"
-                    SortBy="@col.SortBy"
-                    Class="@col.Class">
+                                Align="@col.Align"
+                                SortBy="@col.SortBy"
+                                Class="@col.Class">
                     @col.ChildContent(context)
                 </TemplateColumn>
             }
             else
             {
+                // Format="@col.Format" is not working, causing Blazor to crash
                 <PropertyColumn Title="@col.Title"
-                    Align="@col.Align"
-                    Class="@col.Class"
-                    Property="@col.Property"
-                    Sortable="true" />
+                                Align="@col.Align"
+                                Class="@col.Class"
+                                Property="@col.Property"
+                                Sortable="true" />
             }
         }
     </text>;
