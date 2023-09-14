@@ -2,6 +2,7 @@ namespace QuickGridToolkit;
 
 public class ColumnManager<TGridItem>
 {
+    private const string MissingTitle = "Title n/a";
     public readonly List<DynamicColumn<TGridItem>> Columns = new();
 
     public readonly QuickGridColumns QuickGridColumns = new();
@@ -17,16 +18,41 @@ public class ColumnManager<TGridItem>
         if (column == null) return;
 
         if (string.IsNullOrWhiteSpace(column.Title))
-            column.Title = GetPropertyName(column.Property) ?? "Title n/a";
+            column.Title = GetPropertyName(column.Property) ?? ColumnManager<TGridItem>.MissingTitle;
 
         Columns.Add(column);
 
         column.Id = Columns.Count;
     }
 
-    public void AddSimple(Expression<Func<TGridItem, object?>> expression)
+    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null)
     {
-        Add(new() { Property = expression });
+        Add(new() { Property = expression, Title = title });
+    }
+
+    public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
+    {
+        var compiledExpression = expression.Compile();
+
+        Add(new()
+        {
+            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            ChildContent = (item) => (builder) =>
+            {
+                var value = compiledExpression.Invoke(item);
+                if (value is DateTime date)
+                {
+                    builder.AddContent(0, date.ToString(format));
+                }
+                else
+                {
+                    builder.AddContent(0, default(string));
+                }
+            },
+            SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
+            ColumnType = typeof(TemplateColumn<TGridItem>),
+            Format = format
+        });
     }
 
     public void AddTickColumn(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center)
