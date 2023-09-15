@@ -30,6 +30,54 @@ public class ColumnManager<TGridItem>
         Add(new() { Property = expression, Title = title });
     }
 
+    public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
+    {
+        var compiledExpression = expression.Compile();
+
+        Add(new()
+        {
+            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            ChildContent = (item) => (builder) =>
+            {
+                var value = compiledExpression.Invoke(item);
+                builder.OpenElement(0, "div");
+                if (onClick is not null)
+                {
+                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                }
+                builder.AddContent(2, value);
+                builder.CloseElement();
+            },
+            SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
+            ColumnType = typeof(TemplateColumn<TGridItem>),
+            Align = align,
+            Class = @class
+        });
+    }
+
+    public void AddAction(string staticContent, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
+    {
+        Add(new()
+        {
+            Title = title ?? "Action",
+            ChildContent = (TGridItem item) => (builder) =>
+            {
+                builder.OpenElement(0, "div");
+                if (onClick != null)
+                {
+                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                }
+
+                builder.AddContent(2, staticContent);
+                builder.CloseElement();
+            },
+            ColumnType = typeof(TemplateColumn<TGridItem>),
+            Align = align,
+            Class = @class
+        });
+    }
+
+
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
     {
         var compiledExpression = expression.Compile();
