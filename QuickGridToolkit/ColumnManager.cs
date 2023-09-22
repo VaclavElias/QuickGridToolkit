@@ -113,9 +113,9 @@ public class ColumnManager<TGridItem>
         Add(new() { Property = expression, ColumnType = typeof(ImageColumn<TGridItem>), Title = title, Align = align, Class = @class });
     }
 
-    public void AddTemplateColumn(RenderFragment<TGridItem> childContent, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
+    public void AddTemplateColumn(RenderFragment<TGridItem> childContent, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null, string? cssClass = null)
     {
-        Add(new() { ChildContent = childContent, ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
+        Add(new() { ChildContent = childContent, ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy, Class = cssClass });
     }
 
     public void AddTemplateColumn2(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
