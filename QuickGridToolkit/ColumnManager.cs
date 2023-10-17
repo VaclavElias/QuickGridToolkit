@@ -102,6 +102,36 @@ public class ColumnManager<TGridItem>
         });
     }
 
+    public void AddSimpleNumber2(Expression<Func<TGridItem, object?>> expression, string? title = null)
+    {
+        Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.Right });
+    }
+
+    public void AddDoubleNumber(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "N0")
+    {
+        var compiledExpression = expression.Compile();
+
+        Add(new()
+        {
+            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            ChildContent = (item) => (builder) =>
+            {
+                var value = compiledExpression.Invoke(item);
+                if (value is double number)
+                {
+                    builder.AddContent(0, number.ToString(format));
+                }
+                else
+                {
+                    builder.AddContent(0, default(string));
+                }
+            },
+            SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
+            ColumnType = typeof(TemplateColumn<TGridItem>),
+            Format = format
+        });
+    }
+
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
     {
         var compiledExpression = expression.Compile();
