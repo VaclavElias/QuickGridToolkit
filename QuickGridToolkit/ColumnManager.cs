@@ -107,30 +107,51 @@ public class ColumnManager<TGridItem>
         Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.Right });
     }
 
-    public void AddDoubleNumber(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "N0")
+    /// <summary>
+    /// Adds a decimal numeric column to the grid.
+    /// </summary>
+    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string format = "N0")
     {
-        var compiledExpression = expression.Compile();
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
 
-        Add(new()
+        column.ChildContent = (item) => (builder) =>
         {
-            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
-            ChildContent = (item) => (builder) =>
-            {
-                var value = compiledExpression.Invoke(item);
-                if (value is double number)
-                {
-                    builder.AddContent(0, number.ToString(format));
-                }
-                else
-                {
-                    builder.AddContent(0, default(string));
-                }
-            },
-            SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
-            ColumnType = typeof(TemplateColumn<TGridItem>),
-            Format = format
-        });
+            if (item == null) return;
+
+            var value = expression.Compile().Invoke(item);
+
+            builder.AddContent(0, value?.ToString(format));
+        };
+
+        Add(column);
     }
+
+    /// <summary>
+    /// Adds a double numeric column to the grid.
+    /// </summary>
+    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string format = "N0")
+    {
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
+
+        column.ChildContent = (item) => (builder) =>
+        {
+            if (item == null) return;
+
+            var value = expression.Compile().Invoke(item);
+
+            builder.AddContent(0, value?.ToString(format));
+        };
+
+        Add(column);
+    }
+
+    private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title) => new DynamicColumn<TGridItem>()
+    {
+        Title = title ?? GetPropertyName(expression),
+        SortBy = GridSort<TGridItem>.ByAscending(expression),
+        ColumnType = typeof(TemplateColumn<TGridItem>),
+        Align = Align.Right
+    };
 
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
     {
@@ -180,7 +201,7 @@ public class ColumnManager<TGridItem>
     public void AddIndexColumn(string title = "#", Align align = Align.Center)
         => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align });
 
-    private static string? GetPropertyName(Expression<Func<TGridItem, object?>>? expression)
+    private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
     {
         if (expression is null) return null;
 
