@@ -145,6 +145,25 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
+    /// <summary>
+    /// Adds a int numeric column to the grid.
+    /// </summary>
+    public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string format = "N0")
+    {
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
+
+        column.ChildContent = (item) => (builder) =>
+        {
+            if (item == null) return;
+
+            var value = expression.Compile().Invoke(item);
+
+            builder.AddContent(0, value?.ToString(format));
+        };
+
+        Add(column);
+    }
+
     private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title) => new DynamicColumn<TGridItem>()
     {
         Title = title ?? GetPropertyName(expression),
