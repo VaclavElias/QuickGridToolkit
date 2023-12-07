@@ -110,9 +110,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a decimal numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string format = "N0")
+    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string format = "N0", string? @class = null)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, @class);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -129,9 +129,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a double numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string format = "N0")
+    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string format = "N0", string? @class = null)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, @class);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -148,9 +148,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a int numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string format = "N0")
+    public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string format = "N0", string? @class = null)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title);
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, @class);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -164,12 +164,13 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
-    private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title) => new DynamicColumn<TGridItem>()
+    private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? @class = null) => new DynamicColumn<TGridItem>()
     {
         Title = title ?? GetPropertyName(expression),
         SortBy = GridSort<TGridItem>.ByAscending(expression),
         ColumnType = typeof(TemplateColumn<TGridItem>),
-        Align = Align.Right
+        Align = Align.Right,
+        Class = @class
     };
 
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
