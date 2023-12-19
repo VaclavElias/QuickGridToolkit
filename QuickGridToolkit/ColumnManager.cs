@@ -173,6 +173,12 @@ public class ColumnManager<TGridItem>
         Class = @class
     };
 
+    /// <summary>
+    /// Adds a simple date column to the grid based on a specified expression.
+    /// </summary>
+    /// <param name="expression">An expression to determine the property of the grid item to display.</param>
+    /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
+    /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
     {
         var compiledExpression = expression.Compile();
@@ -183,14 +189,13 @@ public class ColumnManager<TGridItem>
             ChildContent = (item) => (builder) =>
             {
                 var value = compiledExpression.Invoke(item);
-                if (value is DateTime date)
+                var displayValue = value switch
                 {
-                    builder.AddContent(0, date.ToString(format));
-                }
-                else
-                {
-                    builder.AddContent(0, default(string));
-                }
+                    DateTime date => date.ToString(format),
+                    DateOnly dateOnly => dateOnly.ToString(format),
+                    _ => default
+                };
+                builder.AddContent(0, displayValue);
             },
             SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
             ColumnType = typeof(TemplateColumn<TGridItem>),
