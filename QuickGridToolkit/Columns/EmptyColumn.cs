@@ -4,6 +4,8 @@ public class EmptyColumn<TGridItem> : ColumnBase<TGridItem>
 {
     private readonly static RenderFragment<TGridItem> _emptyChildContent = _ => __ => { };
 
+    public override GridSort<TGridItem>? SortBy { get; set; }
+
     [Parameter] public RenderFragment<TGridItem> ChildContent { get; set; } = _emptyChildContent;
 
     protected override void CellContent(RenderTreeBuilder builder, TGridItem item)

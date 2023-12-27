@@ -2,6 +2,8 @@ namespace QuickGridToolkit.Columns;
 
 public class ImageColumn<TGridItem> : ColumnBase<TGridItem>
 {
+    public override GridSort<TGridItem>? SortBy { get; set; }
+
     [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
 
     private Expression<Func<TGridItem, object>>? _lastAssignedProperty;

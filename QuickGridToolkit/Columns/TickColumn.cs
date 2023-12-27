@@ -1,15 +1,17 @@
 namespace QuickGridToolkit.Columns;
 
 // source https://github.com/aspnet/AspLabs/blob/main/src/QuickGrid/src/Microsoft.AspNetCore.Components.QuickGrid/Columns/PropertyColumn.cs
-public class TickColumn<TGridItem> : ColumnBase<TGridItem>, ISortBuilderColumn<TGridItem>
+public class TickColumn<TGridItem> : ColumnBase<TGridItem>
 {
+    public override GridSort<TGridItem>? SortBy { get; set; }
+
     [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
 
     private Expression<Func<TGridItem, object>>? _lastAssignedProperty;
     private Func<TGridItem, object?>? _cellTextFunc;
     private GridSort<TGridItem>? _sortBuilder;
 
-    GridSort<TGridItem>? ISortBuilderColumn<TGridItem>.SortBuilder => _sortBuilder;
+    //GridSort<TGridItem>? ISortBuilderColumn<TGridItem>.SortBuilder => _sortBuilder;
 
     protected override void CellContent(RenderTreeBuilder builder, TGridItem item)
     {
