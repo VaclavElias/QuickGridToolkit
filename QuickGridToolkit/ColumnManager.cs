@@ -77,6 +77,7 @@ public class ColumnManager<TGridItem>
         });
     }
 
+    [Obsolete("Use AddNumber instead.", true)]
     public void AddSimpleNumber(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "N0")
     {
         var compiledExpression = expression.Compile();
@@ -102,6 +103,7 @@ public class ColumnManager<TGridItem>
         });
     }
 
+    [Obsolete("Use AddNumber instead.", true)]
     public void AddSimpleNumber2(Expression<Func<TGridItem, object?>> expression, string? title = null)
     {
         Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.Right });
