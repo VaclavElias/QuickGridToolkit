@@ -1,8 +1,10 @@
 @code {
-    public static RenderFragment Columns<TGridItem>(ColumnManager<TGridItem> columnManager) => @<text>
+    //public static RenderFragment Columns<TGridItem>(ColumnManager<TGridItem> columnManager, Func<ColumnBase<TGridItem>, SortDirection, Task> sortAction), @onclick="@(() => sortAction(context, SortDirection.Auto))
+    public static RenderFragment Columns<TGridItem>(ColumnManager<TGridItem> columnManager)
+        => @<text>
         @foreach (var col in columnManager.Get())
         {
-            @if (col.ColumnType == typeof(EmptyColumn<TGridItem>))
+            if (col.ColumnType == typeof(EmptyColumn<TGridItem>))
             {
                 <EmptyColumn TGridItem="TGridItem" Title="@col.Title" Align="@col.Align">
                     <i></i>
@@ -29,17 +31,25 @@
                                 Align="@col.Align"
                                 SortBy="@col.SortBy"
                                 Class="@col.Class">
-                    @col.ChildContent(context)
+                    <ChildContent>@col.ChildContent(context)</ChildContent>
+                    <HeaderTemplate>test2</HeaderTemplate>
                 </TemplateColumn>
             }
             else
             {
-                // Format="@col.Format" is not working, causing Blazor to crash
+            // Format="@col.Format" is not working, causing Blazor to crash
                 <PropertyColumn Title="@col.Title"
                                 Align="@col.Align"
                                 Class="@col.Class"
                                 Property="@col.Property"
-                                Sortable="true" />
+                                Sortable="true">
+                    <HeaderTemplate>
+                <button class="col-title" type="button">
+                            <div class="col-title-text">@col.Title</div>
+                            <div class="sort-indicator" aria-hidden="true"></div>
+                        </button>
+                    </HeaderTemplate>
+                </PropertyColumn>
             }
         }
     </text>;
