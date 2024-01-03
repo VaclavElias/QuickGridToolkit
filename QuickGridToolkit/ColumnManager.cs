@@ -32,9 +32,9 @@ public class ColumnManager<TGridItem>
         column.Id = Columns.Count;
     }
 
-    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null)
+    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string? @class = null)
     {
-        Add(new() { Property = expression, Title = title, FullTitle = fullTitle });
+        Add(new() { Property = expression, Title = title, FullTitle = fullTitle, Class = @class });
     }
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
