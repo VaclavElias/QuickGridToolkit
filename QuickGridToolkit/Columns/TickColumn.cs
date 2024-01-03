@@ -37,7 +37,7 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
             _sortBuilder = GridSort<TGridItem>.ByAscending(Property);
         }
 
-        // It seems we don't need this below title extraciion?
+        // It seems we don't need this below title extraction?
 
         //if (Title is not null) return;
 
