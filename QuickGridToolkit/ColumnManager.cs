@@ -1,8 +1,15 @@
+using System.Globalization;
+
 namespace QuickGridToolkit;
 
 public class ColumnManager<TGridItem>
 {
     private const string MissingTitle = "Title n/a";
+    private const string NegativeDescription = "negative";
+    private const string PositiveDescription = "positive";
+    private const string ZeroDescription = "zero";
+    private const string UnknownDescription = "unknown";
+    private const string NoValueDescription = "no-value";
     public readonly List<DynamicColumn<TGridItem>> Columns = new();
 
     public readonly QuickGridColumns QuickGridColumns = new();
@@ -166,6 +173,36 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
+    public void AddStyledNumber<TValue>(
+        Expression<Func<TGridItem, TValue?>> expression,
+        string? title = null, string?
+        fullTitle = null,
+        string format = "N0",
+        string? @class = null,
+        Dictionary<TValue, string>? customStyling = null) where TValue : struct, IFormattable
+    {
+        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, fullTitle, @class);
+
+        column.ChildContent = (item) => (builder) =>
+        {
+            if (item == null) return;
+
+            var value = expression.Compile().Invoke(item);
+
+            if (value.HasValue)
+            {
+                string formattedValue = value.Value.ToString(format, CultureInfo.InvariantCulture);
+                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueNature(value.Value, customStyling)}\">{formattedValue}</span>");
+            }
+            else
+            {
+                builder.AddContent(0, string.Empty);
+            }
+        };
+
+        Add(column);
+    }
+
     private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null) => new DynamicColumn<TGridItem>()
     {
         Title = title ?? GetPropertyName(expression),
@@ -175,6 +212,28 @@ public class ColumnManager<TGridItem>
         FullTitle = fullTitle,
         Class = @class
     };
+
+    private static string DetermineValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
+    {
+        switch (value)
+        {
+            case TValue customValue when customStyling?.ContainsKey(customValue) == true:
+                return customStyling[customValue];
+            case null:
+                return NoValueDescription;
+            case int intValue when intValue < 0:
+            case decimal decimalValue when decimalValue < 0:
+                return NegativeDescription;
+            case int intValue when intValue > 0:
+            case decimal decimalValue when decimalValue > 0:
+                return PositiveDescription;
+            case int intValue when intValue == 0:
+            case decimal decimalValue when decimalValue == 0:
+                return ZeroDescription;
+            default:
+                return UnknownDescription;
+        }
+    }
 
     /// <summary>
     /// Adds a simple date column to the grid based on a specified expression.
