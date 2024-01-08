@@ -113,7 +113,7 @@ public class ColumnManager<TGridItem>
     [Obsolete("Use AddNumber instead.", true)]
     public void AddSimpleNumber2(Expression<Func<TGridItem, object?>> expression, string? title = null)
     {
-        Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.Right });
+        Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.End });
     }
 
     /// <summary>
@@ -208,9 +208,9 @@ public class ColumnManager<TGridItem>
         Title = title ?? GetPropertyName(expression),
         SortBy = GridSort<TGridItem>.ByAscending(expression),
         ColumnType = typeof(TemplateColumn<TGridItem>),
-        Align = Align.Right,
+        Align = Align.End,
         FullTitle = fullTitle,
-        Class = @class
+        Class = @class,
     };
 
     private static string DetermineValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
@@ -241,13 +241,14 @@ public class ColumnManager<TGridItem>
     /// <param name="expression">An expression to determine the property of the grid item to display.</param>
     /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
     /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
-    public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "dd/MM/yyyy")
+    public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string format = "dd/MM/yyyy")
     {
         var compiledExpression = expression.Compile();
 
         Add(new()
         {
             Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            FullTitle = fullTitle,
             ChildContent = (item) => (builder) =>
             {
                 var value = compiledExpression.Invoke(item);
