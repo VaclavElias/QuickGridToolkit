@@ -32,9 +32,39 @@ public class ColumnManager<TGridItem>
         column.Id = Columns.Count;
     }
 
-    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string? @class = null)
+    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string? @class = null, Align align = Align.Left)
     {
-        Add(new() { Property = expression, Title = title, FullTitle = fullTitle, Class = @class });
+        Add(new() { Property = expression, Title = title, FullTitle = fullTitle, Class = @class, Align = align });
+    }
+
+    public void AddSimple<TValue>(
+        Expression<Func<TGridItem, TValue?>> expression,
+        string? title = null,
+        string? fullTitle = null,
+        string format = "N0",
+        string? @class = null,
+        Align align = Align.Left,
+        Dictionary<TValue, string>? customStyling = null)
+    {
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
+
+        column.ChildContent = (item) => (builder) =>
+        {
+            if (item == null) return;
+
+            var value = expression.Compile().Invoke(item);
+
+            if (value is not null)
+            {
+                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, customStyling)}\">{value}</span>");
+            }
+            else
+            {
+                builder.AddContent(0, string.Empty);
+            }
+        };
+
+        Add(column);
     }
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
@@ -113,15 +143,15 @@ public class ColumnManager<TGridItem>
     [Obsolete("Use AddNumber instead.", true)]
     public void AddSimpleNumber2(Expression<Func<TGridItem, object?>> expression, string? title = null)
     {
-        Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.End });
+        Add(new() { Property = expression, Title = title, Format = "N0", Align = Align.Right });
     }
 
     /// <summary>
     /// Adds a decimal numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null)
+    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, fullTitle, @class);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -138,9 +168,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a double numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null)
+    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, fullTitle, @class);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -157,9 +187,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a int numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null)
+    public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right)
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, fullTitle, @class);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -175,13 +205,14 @@ public class ColumnManager<TGridItem>
 
     public void AddStyledNumber<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
-        string? title = null, string?
-        fullTitle = null,
+        string? title = null,
+        string? fullTitle = null,
         string format = "N0",
         string? @class = null,
+        Align align = Align.Right,
         Dictionary<TValue, string>? customStyling = null) where TValue : struct, IFormattable
     {
-        DynamicColumn<TGridItem> column = BuildNumericColumn(expression, title, fullTitle, @class);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -192,7 +223,7 @@ public class ColumnManager<TGridItem>
             if (value.HasValue)
             {
                 string formattedValue = value.Value.ToString(format, CultureInfo.InvariantCulture);
-                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueNature(value.Value, customStyling)}\">{formattedValue}</span>");
+                builder.AddMarkupContent(0, $"<span content=\"{DetermineNumericValueNature(value.Value, customStyling)}\">{formattedValue}</span>");
             }
             else
             {
@@ -203,17 +234,17 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
-    private static DynamicColumn<TGridItem> BuildNumericColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null) => new DynamicColumn<TGridItem>()
+    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left) => new DynamicColumn<TGridItem>()
     {
         Title = title ?? GetPropertyName(expression),
         SortBy = GridSort<TGridItem>.ByAscending(expression),
         ColumnType = typeof(TemplateColumn<TGridItem>),
-        Align = Align.End,
+        Align = align,
         FullTitle = fullTitle,
         Class = @class,
     };
 
-    private static string DetermineValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
+    private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
     {
         switch (value)
         {
@@ -233,6 +264,16 @@ public class ColumnManager<TGridItem>
             default:
                 return UnknownDescription;
         }
+    }
+
+    private static string DetermineValueStyling<TValue>(TValue value, Dictionary<TValue, string>? customStyling = null) where TValue : notnull
+    {
+        return value switch
+        {
+            null => "",
+            var customValue when customStyling?.ContainsKey(customValue) == true => customStyling[customValue],
+            _ => "",
+        };
     }
 
     /// <summary>
