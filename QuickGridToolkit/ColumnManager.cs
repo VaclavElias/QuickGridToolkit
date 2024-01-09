@@ -32,19 +32,20 @@ public class ColumnManager<TGridItem>
         column.Id = Columns.Count;
     }
 
-    public void AddSimple(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string? @class = null, Align align = Align.Left)
-    {
-        Add(new() { Property = expression, Title = title, FullTitle = fullTitle, Class = @class, Align = align });
-    }
-
+    /// <summary>
+    /// Adds a simple date column to the grid based on a specified expression.
+    /// </summary>
+    /// <param name="expression">An expression to determine the property of the grid item to display.</param>
+    /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
+    /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
     public void AddSimple<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
         string? title = null,
         string? fullTitle = null,
-        string format = "N0",
+        string? format = null,
         string? @class = null,
         Align align = Align.Left,
-        Dictionary<TValue, string>? customStyling = null)
+        Dictionary<TValue, string>? customStyling = null) // where TValue : notnull, let's have warning for now here, instead of callers
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
@@ -54,18 +55,39 @@ public class ColumnManager<TGridItem>
 
             var value = expression.Compile().Invoke(item);
 
-            if (value is not null)
+            if (value is null)
             {
-                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, customStyling)}\">{value}</span>");
+                builder.AddContent(0, string.Empty);
             }
             else
             {
-                builder.AddContent(0, string.Empty);
+                string displayValue;
+
+                if (value is IFormattable formattableValue)
+                {
+                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    displayValue = $"{value}";
+                }
+
+                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, customStyling)}\">{displayValue}</span>");
             }
         };
 
         Add(column);
     }
+
+    // ToDo: This will replace AddSimpleDate
+    public void AddSimpleDate2<TValue>(
+    Expression<Func<TGridItem, TValue?>> expression,
+    string? title = null,
+    string? fullTitle = null,
+    string? format = "dd/MM/yyyy",
+    string? @class = null,
+    Align align = Align.Center,
+    Dictionary<TValue, string>? customStyling = null) => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
     {
@@ -266,7 +288,8 @@ public class ColumnManager<TGridItem>
         }
     }
 
-    private static string DetermineValueStyling<TValue>(TValue value, Dictionary<TValue, string>? customStyling = null) where TValue : notnull
+    // where TValue : notnull
+    private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null)
     {
         return value switch
         {
@@ -282,6 +305,7 @@ public class ColumnManager<TGridItem>
     /// <param name="expression">An expression to determine the property of the grid item to display.</param>
     /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
     /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
+    [Obsolete("Use AddSimpleDate2 instead.", true)]
     public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string format = "dd/MM/yyyy")
     {
         var compiledExpression = expression.Compile();
