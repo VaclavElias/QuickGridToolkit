@@ -126,7 +126,6 @@ public class ColumnManager<TGridItem>
                 {
                     builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
                 }
-
                 builder.AddContent(2, staticContent);
                 builder.CloseElement();
             },
@@ -232,7 +231,8 @@ public class ColumnManager<TGridItem>
         string format = "N0",
         string? @class = null,
         Align align = Align.Right,
-        Dictionary<TValue, string>? customStyling = null) where TValue : struct, IFormattable
+        Dictionary<TValue, string>? customStyling = null,
+        Func<TGridItem, Task>? onClick = null) where TValue : struct, IFormattable
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
@@ -245,7 +245,19 @@ public class ColumnManager<TGridItem>
             if (value.HasValue)
             {
                 string formattedValue = value.Value.ToString(format, CultureInfo.InvariantCulture);
-                builder.AddMarkupContent(0, $"<span content=\"{DetermineNumericValueNature(value.Value, customStyling)}\">{formattedValue}</span>");
+                string content = $"<span content=\"{DetermineNumericValueNature(value.Value, customStyling)}\">{formattedValue}</span>";
+
+                if (onClick is null)
+                {
+                    builder.AddMarkupContent(0, content);
+                }
+                else
+                {
+                    builder.OpenElement(0, "div");
+                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                    builder.AddMarkupContent(2, content);
+                    builder.CloseElement();
+                }
             }
             else
             {
