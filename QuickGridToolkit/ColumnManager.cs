@@ -276,7 +276,36 @@ public class ColumnManager<TGridItem>
         Align = align,
         FullTitle = fullTitle,
         Class = @class,
+        Property = ConvertExpressionToObject(expression)
     };
+
+
+    private static Expression<Func<TGridItem, object?>> ConvertExpressionToObject<TValue>(
+        Expression<Func<TGridItem, TValue?>> expression)
+    {
+        // Check if the body's result type is already object to avoid unnecessary conversion
+        if (typeof(TValue) == typeof(object))
+        {
+            // Safe to return as is because TValue is object. However, we need to handle nullable conversion.
+            return expression as Expression<Func<TGridItem, object?>>
+                   ?? throw new InvalidOperationException("Failed to convert expression.");
+        }
+
+        // Prepare a conversion of the expression's body to object?
+        var body = expression.Body;
+
+        // Handle nullable value types by converting to object
+        if (typeof(TValue).IsValueType)
+        {
+            body = Expression.Convert(body, typeof(object));
+        }
+
+        // Rebuild the lambda expression with the converted body
+        var convertedExpression = Expression.Lambda<Func<TGridItem, object?>>(body, expression.Parameters);
+
+        return convertedExpression;
+    }
+
 
     private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
     {
