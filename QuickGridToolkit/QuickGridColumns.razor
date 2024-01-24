@@ -5,7 +5,7 @@
         {
             if (col.ColumnType == typeof(EmptyColumn<TGridItem>))
             {
-                <EmptyColumn TGridItem="TGridItem" Title="@col.Title" Align="@col.Align">
+                <EmptyColumn TGridItem="TGridItem" Title="@col.Title" Align="@col.Align" Class="@col.Class">
                     <i></i>
                 </EmptyColumn>
             }
