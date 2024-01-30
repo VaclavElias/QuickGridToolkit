@@ -135,6 +135,27 @@ public class ColumnManager<TGridItem>
         });
     }
 
+    public void AddAction(string staticContent, string? title = null, Align align = Align.Left, string? @class = null, Action<TGridItem>? onClick = null)
+    {
+        Add(new()
+        {
+            Title = title ?? "Action",
+            ChildContent = (TGridItem item) => (builder) =>
+            {
+                builder.OpenElement(0, "div");
+                if (onClick != null)
+                {
+                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                }
+                builder.AddContent(2, staticContent);
+                builder.CloseElement();
+            },
+            ColumnType = typeof(TemplateColumn<TGridItem>),
+            Align = align,
+            Class = @class
+        });
+    }
+
     [Obsolete("Use AddNumber instead.", true)]
     public void AddSimpleNumber(Expression<Func<TGridItem, object?>> expression, string? title = null, string format = "N0")
     {
