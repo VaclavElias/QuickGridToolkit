@@ -135,20 +135,29 @@ public class ColumnManager<TGridItem>
         });
     }
 
-    public void AddAction(string staticContent, string? title = null, Align align = Align.Left, string? @class = null, Action<TGridItem>? onClick = null)
+    public void AddAction(
+        string staticContent,
+        string? title = null,
+        Align align = Align.Left,
+        string? @class = null,
+        Action<TGridItem>? onClick = null,
+        Expression<Func<TGridItem, bool>>? enabled = null)
     {
         Add(new()
         {
             Title = title ?? "Action",
             ChildContent = (TGridItem item) => (builder) =>
             {
-                builder.OpenElement(0, "div");
-                if (onClick != null)
+                if (enabled?.Compile().Invoke(item) != false)
                 {
-                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                    builder.OpenElement(0, "div");
+                    if (onClick != null)
+                    {
+                        builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
+                    }
+                    builder.AddContent(2, staticContent);
+                    builder.CloseElement();
                 }
-                builder.AddContent(2, staticContent);
-                builder.CloseElement();
             },
             ColumnType = typeof(TemplateColumn<TGridItem>),
             Align = align,
