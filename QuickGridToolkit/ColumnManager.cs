@@ -81,13 +81,14 @@ public class ColumnManager<TGridItem>
 
     // ToDo: This will replace AddSimpleDate
     public void AddSimpleDate2<TValue>(
-    Expression<Func<TGridItem, TValue?>> expression,
-    string? title = null,
-    string? fullTitle = null,
-    string? format = "dd/MM/yyyy",
-    string? @class = null,
-    Align align = Align.Center,
-    Dictionary<TValue, string>? customStyling = null) => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
+        Expression<Func<TGridItem, TValue?>> expression,
+        string? title = null,
+        string? fullTitle = null,
+        string? format = "dd/MM/yyyy",
+        string? @class = null,
+        Align align = Align.Center,
+        Dictionary<TValue, string>? customStyling = null)
+        => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
     {
@@ -402,9 +403,20 @@ public class ColumnManager<TGridItem>
         });
     }
 
-    public void AddTickColumn(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center)
+    public void AddTickColumn(
+        Expression<Func<TGridItem, object?>> expression,
+        string? title = null,
+        string? fullTitle = null,
+        Align align = Align.Center)
     {
-        Add(new() { Property = expression, ColumnType = typeof(TickColumn<TGridItem>), Title = title, Align = align });
+        Add(new()
+        {
+            Property = expression,
+            Title = title,
+            FullTitle = fullTitle,
+            ColumnType = typeof(TickColumn<TGridItem>),
+            Align = align
+        });
     }
 
     public void AddImageColumn(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, string? @class = null)
