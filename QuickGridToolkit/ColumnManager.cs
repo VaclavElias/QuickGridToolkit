@@ -45,7 +45,7 @@ public class ColumnManager<TGridItem>
         string? format = null,
         string? @class = null,
         Align align = Align.Left,
-        Dictionary<TValue, string>? customStyling = null) // where TValue : notnull, let's have warning for now here, instead of callers
+        Dictionary<TValue, string>? cellStyle = null) // where TValue : notnull, let's have warning for now here, instead of callers
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
 
@@ -72,7 +72,7 @@ public class ColumnManager<TGridItem>
                     displayValue = $"{value}";
                 }
 
-                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, customStyling)}\">{displayValue}</span>");
+                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, cellStyle)}\">{displayValue}</span>");
             }
         };
 
@@ -262,7 +262,7 @@ public class ColumnManager<TGridItem>
         string format = "N0",
         string? @class = null,
         Align align = Align.Right,
-        Dictionary<TValue, string>? customStyling = null,
+        Dictionary<TValue, string>? cellStyle = null,
         Func<TGridItem, Task>? onClick = null) where TValue : struct, IFormattable
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
@@ -276,7 +276,7 @@ public class ColumnManager<TGridItem>
             if (value.HasValue)
             {
                 string formattedValue = value.Value.ToString(format, CultureInfo.InvariantCulture);
-                string content = $"<span content=\"{DetermineNumericValueNature(value.Value, customStyling)}\">{formattedValue}</span>";
+                string content = $"<span content=\"{DetermineNumericValueNature(value.Value, cellStyle)}\">{formattedValue}</span>";
 
                 if (onClick is null)
                 {
@@ -338,12 +338,12 @@ public class ColumnManager<TGridItem>
     }
 
 
-    private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null) where TValue : struct
+    private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null) where TValue : struct
     {
         switch (value)
         {
-            case TValue customValue when customStyling?.ContainsKey(customValue) == true:
-                return customStyling[customValue];
+            case TValue customValue when cellStyle?.ContainsKey(customValue) == true:
+                return cellStyle[customValue];
             case null:
                 return NoValueDescription;
             case int intValue when intValue < 0:
@@ -361,12 +361,12 @@ public class ColumnManager<TGridItem>
     }
 
     // where TValue : notnull
-    private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? customStyling = null)
+    private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null)
     {
         return value switch
         {
             null => "",
-            var customValue when customStyling?.ContainsKey(customValue) == true => customStyling[customValue],
+            var customValue when cellStyle?.ContainsKey(customValue) == true => cellStyle[customValue],
             _ => "",
         };
     }
