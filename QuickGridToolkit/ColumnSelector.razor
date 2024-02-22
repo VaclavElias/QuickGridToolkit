@@ -10,7 +10,8 @@
             </div>
         }
         <p class="mt-1">
-            <small class="text-secondary text-decoration-underline action" @onclick="UncheckAll">Uncheck all</small>
+            <small class="text-info text-decoration-underline action" @onclick="UncheckAll">Uncheck all</small>
+            <small class="text-info text-decoration-underline action ms-2" @onclick="CheckAll">Check all</small>
             @* <small>Drag and drop to reorder columns</small> *@
         </p>
     </div>
@@ -24,9 +25,23 @@
 
     private void UncheckAll()
     {
+        if (ColumnManager == null) return;
+
         foreach (var col in ColumnManager.Columns)
         {
             col.Visible = false;
+        }
+
+        SelectionChanged.InvokeAsync();
+    }
+
+    private void CheckAll()
+    {
+        if (ColumnManager == null) return;
+
+        foreach (var col in ColumnManager.Columns)
+        {
+            col.Visible = true;
         }
 
         SelectionChanged.InvokeAsync();

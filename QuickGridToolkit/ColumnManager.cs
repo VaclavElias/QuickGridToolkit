@@ -262,6 +262,7 @@ public class ColumnManager<TGridItem>
         string format = "N0",
         string? @class = null,
         Align align = Align.Right,
+        bool visible = true,
         Dictionary<TValue, string>? cellStyle = null,
         Func<TGridItem, Task>? onClick = null) where TValue : struct, IFormattable
     {
@@ -295,6 +296,8 @@ public class ColumnManager<TGridItem>
                 builder.AddContent(0, string.Empty);
             }
         };
+
+        column.Visible = visible;
 
         Add(column);
     }
