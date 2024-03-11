@@ -90,13 +90,14 @@ public class ColumnManager<TGridItem>
         Dictionary<TValue, string>? customStyling = null)
         => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
 
-    public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
+    public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
     {
         var compiledExpression = expression.Compile();
 
         Add(new()
         {
             Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            FullTitle = fullTitle,
             ChildContent = (item) => (builder) =>
             {
                 var value = compiledExpression.Invoke(item);
