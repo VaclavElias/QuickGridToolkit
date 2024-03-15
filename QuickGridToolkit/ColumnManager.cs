@@ -45,9 +45,10 @@ public class ColumnManager<TGridItem>
         string? format = null,
         string? @class = null,
         Align align = Align.Left,
-        Dictionary<TValue, string>? cellStyle = null) // where TValue : notnull, let's have warning for now here, instead of callers
+        Dictionary<TValue, string>? cellStyle = null,
+        GridSort<TGridItem>? sortBy = null) // where TValue : notnull, let's have warning for now here, instead of callers
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, sortBy);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -303,10 +304,10 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
-    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left) => new DynamicColumn<TGridItem>()
+    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null) => new DynamicColumn<TGridItem>()
     {
         Title = title ?? GetPropertyName(expression),
-        SortBy = GridSort<TGridItem>.ByAscending(expression),
+        SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(expression),
         ColumnType = typeof(TemplateColumn<TGridItem>),
         Align = align,
         FullTitle = fullTitle,
