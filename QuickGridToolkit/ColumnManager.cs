@@ -46,7 +46,8 @@ public class ColumnManager<TGridItem>
         string? @class = null,
         Align align = Align.Left,
         Dictionary<TValue, string>? cellStyle = null,
-        GridSort<TGridItem>? sortBy = null) // where TValue : notnull, let's have warning for now here, instead of callers
+        GridSort<TGridItem>? sortBy = null,
+        bool visible = true) // where TValue : notnull, let's have warning for now here, instead of callers
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, sortBy);
 
@@ -76,6 +77,8 @@ public class ColumnManager<TGridItem>
                 builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, cellStyle)}\">{displayValue}</span>");
             }
         };
+
+        column.Visible = visible;
 
         Add(column);
     }
