@@ -10,8 +10,9 @@ public class ColumnManager<TGridItem>
     private const string ZeroDescription = "zero";
     private const string UnknownDescription = "unknown";
     private const string NoValueDescription = "no-value";
-    public readonly List<DynamicColumn<TGridItem>> Columns = new();
 
+    public bool IsIndexColumn { get; set; } = true;
+    public readonly List<DynamicColumn<TGridItem>> Columns = [];
     public readonly QuickGridColumns QuickGridColumns = new();
 
     /// <summary>
