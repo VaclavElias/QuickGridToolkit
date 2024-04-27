@@ -446,6 +446,30 @@ public class ColumnManager<TGridItem>
     public void AddIndexColumn(string title = "#", Align align = Align.Center)
         => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align });
 
+    /// <summary>
+    /// Creates a shallow copy of the current list of <see cref="DynamicColumn{TGridItem}"/> objects,
+    /// cloning only basic properties such as Title, FullTitle, Property, ColumnType, Format, and Visibility.
+    /// </summary>
+    /// <remarks>
+    /// This method performs a shallow copy, meaning that only the values of the properties are copied.
+    /// Any modifications to the properties of the cloned objects will not affect the original objects in the list.
+    /// </remarks>
+    /// <returns>A new list containing cloned instances of <see cref="DynamicColumn{TGridItem}"/>
+    /// where each column retains the basic property values of the corresponding original column.</returns>
+    public List<DynamicColumn<TGridItem>> SimpleClone()
+    {
+        return Columns.ConvertAll(s => new DynamicColumn<TGridItem>
+        {
+            Id = s.Id,
+            Title = s.Title,
+            FullTitle = s.FullTitle,
+            Property = s.Property,
+            ColumnType = s.ColumnType,
+            Format = s.Format,
+            Visible = s.Visible
+        });
+    }
+
     private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
     {
         if (expression is null) return null;
