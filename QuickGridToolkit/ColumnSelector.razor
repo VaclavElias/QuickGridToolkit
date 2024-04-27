@@ -2,13 +2,15 @@
 @if (ColumnManager != null && Visible)
 {
     <div class="">
-        @foreach (var col in ColumnManager.Columns)
-        {
-            <div class="form-check form-check-inline">
-                <input type="checkbox" @bind="col.Visible" @bind:after="HandleChangeAsync" id="@col.ColumnId" class="form-check-input" />
-                <label class="form-check-label" for="@col.ColumnId">@col.FullTitle</label>
-            </div>
-        }
+        <div style="columns: 3;">
+            @foreach (var col in ColumnManager.Columns)
+            {
+                <div class="form-check">
+                    <input type="checkbox" @bind="col.Visible" @bind:after="HandleChangeAsync" id="@col.ColumnId" class="form-check-input" />
+                    <label class="form-check-label" for="@col.ColumnId">@col.FullTitle</label>
+                </div>
+            }
+        </div>
         <p class="mt-1">
             <small class="text-info text-decoration-underline action" @onclick="UncheckAll">Uncheck all</small>
             <small class="text-info text-decoration-underline action ms-2" @onclick="CheckAll">Check all</small>
