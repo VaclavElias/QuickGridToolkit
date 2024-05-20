@@ -12,8 +12,8 @@ public class ColumnManager<TGridItem>
     private const string NoValueDescription = "no-value";
 
     public bool IsIndexColumn { get; set; } = true;
-    public readonly List<DynamicColumn<TGridItem>> Columns = [];
-    public readonly QuickGridColumns QuickGridColumns = new();
+    public List<DynamicColumn<TGridItem>> Columns { get; } = [];
+    //public QuickGridColumns QuickGridColumns { get; } = new();
 
     /// <summary>
     /// Returns visible columns
@@ -438,10 +438,10 @@ public class ColumnManager<TGridItem>
         Add(new() { ChildContent = childContent, ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, FullTitle = fullTitle, SortBy = sortBy, Class = cssClass });
     }
 
-    public void AddTemplateColumn2(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
-    {
-        Add(new() { ChildContent = QuickGridColumns.GetActionColumn(expression), ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
-    }
+    //public void AddTemplateColumn2(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
+    //{
+    //    Add(new() { ChildContent = QuickGridColumns.GetActionColumn(expression), ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
+    //}
 
     public void AddIndexColumn(string title = "#", Align align = Align.Center)
         => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align });
