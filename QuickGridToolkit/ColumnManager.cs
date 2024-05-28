@@ -85,6 +85,43 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
+    public void AddFooterColumn(
+        int id,
+        object? value,
+        string? format = null,
+        string? @class = null,
+        Align align = Align.Left,
+        bool visible = true)
+    {
+        FooterColumn<IEnumerable<TGridItem>> column = new()
+        {
+            Id = id,
+            Format = format,
+            Class = @class,
+            Align = align,
+            Visible = visible,
+        };
+
+        string displayValue;
+
+        if (value is null)
+        {
+            displayValue = string.Empty;
+        }
+        else if (value is IFormattable formattableValue)
+        {
+            displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            displayValue = $"{value}";
+        }
+
+        column.Content = $"<td class=\"{column.Class}\">{displayValue}</td>";
+
+        FooterColumns.Add(column);
+    }
+
     public void AddFooterColumn<TValue>(
         int id,
         Expression<Func<IEnumerable<TGridItem>, TValue?>> expression,
@@ -125,7 +162,7 @@ public class ColumnManager<TGridItem>
                     displayValue = $"{value}";
                 }
 
-                return $"<td class=\"{column.Class}\">{displayValue}</span>";
+                return $"<td class=\"{column.Class}\">{displayValue}</td>";
             }
         };
 
