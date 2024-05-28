@@ -13,6 +13,7 @@ public class ColumnManager<TGridItem>
 
     public bool IsIndexColumn { get; set; } = true;
     public List<DynamicColumn<TGridItem>> Columns { get; } = [];
+    public List<FooterColumn<IEnumerable<TGridItem>>> FooterColumns { get; } = [];
     //public QuickGridColumns QuickGridColumns { get; } = new();
 
     /// <summary>
@@ -82,6 +83,53 @@ public class ColumnManager<TGridItem>
         column.Visible = visible;
 
         Add(column);
+    }
+
+    public void AddFooterColumn<TValue>(
+        int id,
+        Expression<Func<IEnumerable<TGridItem>, TValue?>> expression,
+        string? format = null,
+        string? @class = null,
+        Align align = Align.Left,
+        bool visible = true)
+    {
+        FooterColumn<IEnumerable<TGridItem>> column = new()
+        {
+            Id = id,
+            Format = format,
+            Class = @class,
+            Align = align,
+            Visible = visible,
+        };
+
+        column.StringContent = (item) =>
+        {
+            if (item == null) return null;
+
+            var value = expression.Compile().Invoke(item);
+
+            if (value is null)
+            {
+                return "<td></td>";
+            }
+            else
+            {
+                string displayValue;
+
+                if (value is IFormattable formattableValue)
+                {
+                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    displayValue = $"{value}";
+                }
+
+                return $"<td class=\"{column.Class}\">{displayValue}</span>";
+            }
+        };
+
+        FooterColumns.Add(column);
     }
 
     // ToDo: This will replace AddSimpleDate
