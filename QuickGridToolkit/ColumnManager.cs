@@ -221,6 +221,8 @@ public class ColumnManager<TGridItem>
             builder.AddContent(0, value?.ToString(format));
         };
 
+        column.IsNumeric = true;
+
         Add(column);
     }
 
@@ -240,6 +242,8 @@ public class ColumnManager<TGridItem>
             builder.AddContent(0, value?.ToString(format));
         };
 
+        column.IsNumeric = true;
+
         Add(column);
     }
 
@@ -258,6 +262,8 @@ public class ColumnManager<TGridItem>
 
             builder.AddContent(0, value?.ToString(format));
         };
+
+        column.IsNumeric = true;
 
         Add(column);
     }
@@ -305,11 +311,12 @@ public class ColumnManager<TGridItem>
         };
 
         column.Visible = visible;
+        column.IsNumeric = true;
 
         Add(column);
     }
 
-    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null) => new DynamicColumn<TGridItem>()
+    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null) => new()
     {
         Title = title ?? GetPropertyName(expression),
         SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(expression),
@@ -319,7 +326,6 @@ public class ColumnManager<TGridItem>
         Class = @class,
         Property = ConvertExpressionToObject(expression)
     };
-
 
     private static Expression<Func<TGridItem, object?>> ConvertExpressionToObject<TValue>(
         Expression<Func<TGridItem, TValue?>> expression)
@@ -346,7 +352,6 @@ public class ColumnManager<TGridItem>
 
         return convertedExpression;
     }
-
 
     private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null) where TValue : struct
     {

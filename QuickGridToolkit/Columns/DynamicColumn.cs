@@ -12,6 +12,7 @@ public class DynamicColumn<TGridItem>
     public string ColumnId => $"column-{Id}";
     public bool Visible { get; set; } = true;
     public bool Sortable { get; set; } = true;
+    public bool IsNumeric { get; set; }
     public string? Title { get; set; } = string.Empty;
     public string? FullTitle
     {
