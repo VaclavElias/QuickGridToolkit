@@ -85,90 +85,6 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
-    public void AddFooterColumn(
-        int id,
-        object? value,
-        string? format = null,
-        string? @class = null,
-        Align align = Align.Left,
-        bool visible = true)
-    {
-        FooterColumn<IEnumerable<TGridItem>> column = new()
-        {
-            Id = id,
-            Format = format,
-            Class = @class,
-            Align = align,
-            Visible = visible,
-        };
-
-        string displayValue;
-
-        if (value is null)
-        {
-            displayValue = string.Empty;
-        }
-        else if (value is IFormattable formattableValue)
-        {
-            displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
-        }
-        else
-        {
-            displayValue = $"{value}";
-        }
-
-        column.Content = $"<td class=\"{column.Class}\">{displayValue}</td>";
-
-        FooterColumns.Add(column);
-    }
-
-    public void AddFooterColumn<TValue>(
-        int id,
-        Expression<Func<IEnumerable<TGridItem>, TValue?>> expression,
-        string? format = null,
-        string? @class = null,
-        Align align = Align.Left,
-        bool visible = true)
-    {
-        FooterColumn<IEnumerable<TGridItem>> column = new()
-        {
-            Id = id,
-            Format = format,
-            Class = @class,
-            Align = align,
-            Visible = visible,
-        };
-
-        column.StringContent = (item) =>
-        {
-            if (item == null) return null;
-
-            var value = expression.Compile().Invoke(item);
-
-            if (value is null)
-            {
-                return "<td></td>";
-            }
-            else
-            {
-                string displayValue;
-
-                if (value is IFormattable formattableValue)
-                {
-                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    displayValue = $"{value}";
-                }
-
-                return $"<td class=\"{column.Class}\">{displayValue}</td>";
-            }
-        };
-
-        FooterColumns.Add(column);
-    }
-
     // ToDo: This will replace AddSimpleDate
     public void AddSimpleDate2<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
@@ -553,6 +469,97 @@ public class ColumnManager<TGridItem>
             Format = s.Format,
             Visible = s.Visible
         });
+    }
+
+    public void AddFooterColumn(
+    int id,
+    object? value,
+    string? format = null,
+    string? @class = null,
+    Align align = Align.Left,
+    bool visible = true)
+    {
+        FooterColumn<IEnumerable<TGridItem>> column = new()
+        {
+            Id = id,
+            Format = format,
+            Class = @class,
+            Align = align,
+            Visible = visible,
+        };
+
+        string displayValue;
+
+        if (value is null)
+        {
+            displayValue = string.Empty;
+        }
+        else if (value is IFormattable formattableValue)
+        {
+            displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            displayValue = $"{value}";
+        }
+
+        column.Content = $"<td class=\"{column.Class}\">{displayValue}</td>";
+
+        FooterColumns.Add(column);
+    }
+
+    public void AddFooterColumn<TValue>(
+        int id,
+        Expression<Func<IEnumerable<TGridItem>, TValue?>> expression,
+        string? format = null,
+        string? @class = null,
+        Align align = Align.Left,
+        bool visible = true)
+    {
+        FooterColumn<IEnumerable<TGridItem>> column = new()
+        {
+            Id = id,
+            Format = format,
+            Class = @class,
+            Align = align,
+            Visible = visible,
+        };
+
+        var compiledExpression = expression.Compile();
+
+        column.StringContent = (item) =>
+        {
+            if (item == null) return null;
+
+            var value = compiledExpression.Invoke(item);
+
+            if (value is null)
+            {
+                return "<td></td>";
+            }
+            else
+            {
+                string displayValue;
+
+                if (value is IFormattable formattableValue)
+                {
+                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    displayValue = $"{value}";
+                }
+
+                return $"<td class=\"{column.Class}\">{displayValue}</td>";
+            }
+        };
+
+        FooterColumns.Add(column);
+    }
+
+    public void AddFooterColumnWithSum()
+    {
+
     }
 
     private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
