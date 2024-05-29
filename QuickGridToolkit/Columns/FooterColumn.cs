@@ -1,4 +1,4 @@
-﻿namespace QuickGridToolkit.Columns;
+namespace QuickGridToolkit.Columns;
 
 public class FooterColumn<TGridItem>
 {
@@ -8,8 +8,6 @@ public class FooterColumn<TGridItem>
     public Align Align { get; set; }
     public string? Format { get; set; }
     public string? Class { get; set; }
-    // ToDo Remove Value
-    public object? Value { get; set; }
     public string? Content { get; set; }
     public Func<TGridItem, string?>? StringContent { get; set; }
 }
