@@ -488,20 +488,7 @@ public class ColumnManager<TGridItem>
             Visible = visible,
         };
 
-        string displayValue;
-
-        if (value is null)
-        {
-            displayValue = string.Empty;
-        }
-        else if (value is IFormattable formattableValue)
-        {
-            displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
-        }
-        else
-        {
-            displayValue = $"{value}";
-        }
+        var displayValue = BuildDisplayValue(value, format);
 
         column.Content = $"<td class=\"{column.Class}\">{displayValue}</td>";
 
@@ -533,33 +520,41 @@ public class ColumnManager<TGridItem>
 
             var value = compiledExpression.Invoke(item);
 
-            if (value is null)
-            {
-                return "<td></td>";
-            }
-            else
-            {
-                string displayValue;
+            var displayValue = BuildDisplayValue(value, format);
 
-                if (value is IFormattable formattableValue)
-                {
-                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    displayValue = $"{value}";
-                }
-
-                return $"<td class=\"{column.Class}\">{displayValue}</td>";
-            }
+            return $"<td class=\"{column.Class}\">{displayValue}</td>";
         };
 
         FooterColumns.Add(column);
     }
 
-    public void AddFooterColumnWithSum()
+    public void AddFooterColumnWithSum(DynamicColumn<TGridItem> column, string removeClass = "")
     {
+        var compiledExpression = column.Property!.Compile();
 
+        AddFooterColumn(
+            column.Id,
+            //items => items.Select(item => compiledExpression(item)).Sum(Convert.ToDecimal),
+            items => items.Sum(item => Convert.ToDecimal(compiledExpression(item))),
+            format: "N0",
+            @class: column.Class?.Replace(removeClass, "")
+        );
+    }
+
+    private static string BuildDisplayValue(object? value, string? format)
+    {
+        if (value is null)
+        {
+            return string.Empty;
+        }
+        else if (value is IFormattable formattableValue)
+        {
+            return formattableValue.ToString(format, CultureInfo.InvariantCulture);
+        }
+        else
+        {
+            return $"{value}";
+        }
     }
 
     private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
