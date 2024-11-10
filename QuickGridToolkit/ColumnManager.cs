@@ -14,6 +14,7 @@ public class ColumnManager<TGridItem>
     public bool IsIndexColumn { get; set; } = true;
     public List<DynamicColumn<TGridItem>> Columns { get; } = [];
     public List<FooterColumn<IEnumerable<TGridItem>>> FooterColumns { get; } = [];
+    public List<string> VisibleColumns { get; } = [];
     //public QuickGridColumns QuickGridColumns { get; } = new();
 
     /// <summary>
@@ -22,16 +23,33 @@ public class ColumnManager<TGridItem>
     /// <returns></returns>
     public IEnumerable<DynamicColumn<TGridItem>> Get() => Columns.Where(w => w.Visible);
 
+    public void SetVisibleColumns(IEnumerable<string> columns)
+    {
+        VisibleColumns.Clear();
+        VisibleColumns.AddRange(columns);
+    }
+
     public void Add(DynamicColumn<TGridItem>? column = default)
     {
         if (column == null) return;
 
         if (string.IsNullOrWhiteSpace(column.Title))
-            column.Title = GetPropertyName(column.Property) ?? ColumnManager<TGridItem>.MissingTitle;
+        {
+            column.Title = GetPropertyName(column.Property) ?? MissingTitle;
+        }
+
+        SetColumnVisibility(column);
 
         Columns.Add(column);
 
         column.Id = Columns.Count;
+    }
+
+    private void SetColumnVisibility(DynamicColumn<TGridItem> column)
+    {
+        if (VisibleColumns.Count == 0 || column.FullTitle is null) return;
+
+        column.Visible = VisibleColumns.Contains(column.FullTitle);
     }
 
     /// <summary>
@@ -565,6 +583,38 @@ public class ColumnManager<TGridItem>
     private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
     {
         if (expression is null) return null;
+
+        MemberExpression? memberExpression;
+
+        if (expression.Body is UnaryExpression unaryExpression)
+            memberExpression = unaryExpression.Operand as MemberExpression;
+        else
+            memberExpression = expression.Body as MemberExpression;
+
+        if (memberExpression == null)
+            throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
+
+        if (!(memberExpression.Member is PropertyInfo propertyInfo))
+            throw new ArgumentException($"Expression '{expression}' refers to a field, not a property.");
+
+        return propertyInfo.Name;
+    }
+
+    private static string? GetPropertyNameNew<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
+    {
+        if (expression is null) return null;
+
+        Expression body = expression.Body;
+
+        while (body is UnaryExpression unaryExpression1)
+        {
+            body = unaryExpression1.Operand;
+        }
+
+        if (body is MemberExpression memberExpression1 && memberExpression1.Member is PropertyInfo propertyInfo1)
+        {
+            return propertyInfo1.Name;
+        }
 
         MemberExpression? memberExpression;
 
