@@ -52,6 +52,14 @@ public class ColumnManager<TGridItem>
         column.Visible = VisibleColumns.Contains(column.FullTitle);
     }
 
+    public void ResetColumnVisibility()
+    {
+        foreach (var column in Columns)
+        {
+            SetColumnVisibility(column);
+        }
+    }
+
     /// <summary>
     /// Adds a simple date column to the grid based on a specified expression.
     /// </summary>
