@@ -14,7 +14,7 @@ public class ColumnManager<TGridItem>
     public bool IsIndexColumn { get; set; } = true;
     public List<DynamicColumn<TGridItem>> Columns { get; } = [];
     public List<FooterColumn<IEnumerable<TGridItem>>> FooterColumns { get; } = [];
-    public List<string> VisibleColumns { get; } = [];
+    //public List<string> VisibleColumns { get; } = [];
     //public QuickGridColumns QuickGridColumns { get; } = new();
 
     /// <summary>
@@ -23,11 +23,11 @@ public class ColumnManager<TGridItem>
     /// <returns></returns>
     public IEnumerable<DynamicColumn<TGridItem>> Get() => Columns.Where(w => w.Visible);
 
-    public void SetVisibleColumns(IEnumerable<string> columns)
-    {
-        VisibleColumns.Clear();
-        VisibleColumns.AddRange(columns);
-    }
+    //public void SetVisibleColumns(IEnumerable<string> columns)
+    //{
+    //    VisibleColumns.Clear();
+    //    VisibleColumns.AddRange(columns);
+    //}
 
     public void Add(DynamicColumn<TGridItem>? column = default)
     {
@@ -38,27 +38,27 @@ public class ColumnManager<TGridItem>
             column.Title = GetPropertyName(column.Property) ?? MissingTitle;
         }
 
-        SetColumnVisibility(column);
+        //SetColumnVisibility(column);
 
         Columns.Add(column);
 
         column.Id = Columns.Count;
     }
 
-    private void SetColumnVisibility(DynamicColumn<TGridItem> column)
-    {
-        if (VisibleColumns.Count == 0 || column.FullTitle is null) return;
+    //private void SetColumnVisibility(DynamicColumn<TGridItem> column)
+    //{
+    //    if (VisibleColumns.Count == 0 || column.FullTitle is null) return;
 
-        column.Visible = VisibleColumns.Contains(column.FullTitle);
-    }
+    //    column.Visible = VisibleColumns.Contains(column.FullTitle);
+    //}
 
-    public void ResetColumnVisibility()
-    {
-        foreach (var column in Columns)
-        {
-            SetColumnVisibility(column);
-        }
-    }
+    //public void ResetColumnVisibility()
+    //{
+    //    foreach (var column in Columns)
+    //    {
+    //        SetColumnVisibility(column);
+    //    }
+    //}
 
     /// <summary>
     /// Adds a simple date column to the grid based on a specified expression.
