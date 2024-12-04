@@ -296,6 +296,16 @@ public class ColumnManager<TGridItem>
 
     public void AddStyledNumber<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
+        ColumnInfo columnInfo,
+        string format = "N0",
+        Align align = Align.Right,
+        bool visible = true,
+        Dictionary<TValue, string>? cellStyle = null,
+        Func<TGridItem, Task>? onClick = null) where TValue : struct, IFormattable
+        => AddStyledNumber(expression, columnInfo.Title, columnInfo.FullTitle, format, columnInfo.Class, align, visible, cellStyle, onClick);
+
+    public void AddStyledNumber<TValue>(
+        Expression<Func<TGridItem, TValue?>> expression,
         string? title = null,
         string? fullTitle = null,
         string format = "N0",
