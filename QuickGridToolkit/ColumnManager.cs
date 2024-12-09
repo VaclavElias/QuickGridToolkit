@@ -60,6 +60,18 @@ public class ColumnManager<TGridItem>
     //    }
     //}
 
+    public void AddSimple<TValue>(
+        Expression<Func<TGridItem, TValue?>> expression,
+        ColumnInfo columnInfo,
+        string? format = null,
+        Align align = Align.Left,
+        Dictionary<TValue, string>? cellStyle = null,
+        GridSort<TGridItem>? sortBy = null,
+        bool visible = true)
+    {
+        AddSimple(expression, columnInfo.Title, columnInfo.FullTitle, format, columnInfo.Class, align, cellStyle, sortBy, visible);
+    }
+
     /// <summary>
     /// Adds a simple date column to the grid based on a specified expression.
     /// </summary>
