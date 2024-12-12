@@ -67,7 +67,7 @@ public class ColumnManager<TGridItem>
         Align align = Align.Left,
         Dictionary<TValue, string>? cellStyle = null,
         GridSort<TGridItem>? sortBy = null,
-        bool visible = true)
+        bool visible = true) // where TValue : notnull, let's have warning for now here, instead of callers
     {
         AddSimple(expression, columnInfo.Title, columnInfo.FullTitle, format, columnInfo.Class, align, cellStyle, sortBy, visible);
     }
@@ -133,6 +133,11 @@ public class ColumnManager<TGridItem>
         Align align = Align.Center,
         Dictionary<TValue, string>? customStyling = null)
         => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
+
+    public void AddAction(Expression<Func<TGridItem, object?>> expression, ColumnInfo columnInfo, Align align = Align.Left, GridSort<TGridItem>? sortBy = null, Func<TGridItem, Task>? onClick = null)
+    {
+        AddAction(expression, columnInfo.Title, columnInfo.FullTitle, align, columnInfo.Class, sortBy, onClick);
+    }
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, Align align = Align.Left, string? @class = null, GridSort<TGridItem>? sortBy = null, Func<TGridItem, Task>? onClick = null)
     {
