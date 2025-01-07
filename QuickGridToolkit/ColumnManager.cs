@@ -134,12 +134,14 @@ public class ColumnManager<TGridItem>
         Dictionary<TValue, string>? customStyling = null)
         => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
 
-    public void AddAction(Expression<Func<TGridItem, object?>> expression, ColumnInfo columnInfo, Align align = Align.Left, GridSort<TGridItem>? sortBy = null, Func<TGridItem, Task>? onClick = null)
+    public void AddAction(Expression<Func<TGridItem, object?>> expression, ColumnInfo columnInfo, Align align = Align.Left, GridSort<TGridItem>? sortBy = null,
+        bool visible = true, Func<TGridItem, Task>? onClick = null)
     {
-        AddAction(expression, columnInfo.Title, columnInfo.FullTitle, align, columnInfo.Class, sortBy, onClick);
+        AddAction(expression, columnInfo.Title, columnInfo.FullTitle, align, columnInfo.Class, sortBy, visible, onClick);
     }
 
-    public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, Align align = Align.Left, string? @class = null, GridSort<TGridItem>? sortBy = null, Func<TGridItem, Task>? onClick = null)
+    public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, Align align = Align.Left, string? @class = null, GridSort<TGridItem>? sortBy = null,
+        bool visible = true, Func<TGridItem, Task>? onClick = null)
     {
         var compiledExpression = expression.Compile();
 
@@ -161,7 +163,8 @@ public class ColumnManager<TGridItem>
             SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
             ColumnType = typeof(TemplateColumn<TGridItem>),
             Align = align,
-            Class = @class
+            Class = @class,
+            Visible = visible
         });
     }
 
