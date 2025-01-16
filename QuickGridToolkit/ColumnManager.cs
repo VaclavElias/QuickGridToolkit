@@ -419,12 +419,15 @@ public class ColumnManager<TGridItem>
                 return NoValueDescription;
             case int intValue when intValue < 0:
             case decimal decimalValue when decimalValue < 0:
+            case double doubleValue when doubleValue < 0:
                 return NegativeDescription;
             case int intValue when intValue > 0:
             case decimal decimalValue when decimalValue > 0:
+            case double doubleValue when doubleValue > 0:
                 return PositiveDescription;
             case int intValue when intValue == 0:
             case decimal decimalValue when decimalValue == 0:
+            case double doubleValue when doubleValue == 0:
                 return ZeroDescription;
             default:
                 return UnknownDescription;
