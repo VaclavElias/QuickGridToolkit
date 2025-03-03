@@ -10,8 +10,10 @@ public class DynamicColumn<TGridItem>
     // We need id so we could list all columns e.g. as checkbox and select which one is visible
     public int Id { get; set; }
     public string ColumnId => $"column-{Id}";
+
     /// <summary>
-    /// Property name of the item that will be displayed in the column. This is used for selected columns exporting.
+    /// Gets or sets the name of the property from <typeparamref name="TGridItem"/> that is displayed in this column.
+    /// This value is used when exporting data for the selected columns and should match the corresponding property name on the grid item.
     /// </summary>
     public string? PropertyName { get; set; }
     public bool Visible { get; set; } = true;
