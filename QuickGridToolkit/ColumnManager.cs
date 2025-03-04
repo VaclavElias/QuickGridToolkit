@@ -669,19 +669,48 @@ public class ColumnManager<TGridItem>
             return propertyInfo1.Name;
         }
 
-        MemberExpression? memberExpression;
+        //MemberExpression? memberExpression;
 
-        if (expression.Body is UnaryExpression unaryExpression)
-            memberExpression = unaryExpression.Operand as MemberExpression;
-        else
-            memberExpression = expression.Body as MemberExpression;
+        //if (expression.Body is UnaryExpression unaryExpression)
+        //    memberExpression = unaryExpression.Operand as MemberExpression;
+        //else
+        //    memberExpression = expression.Body as MemberExpression;
 
-        if (memberExpression == null)
-            throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
+        //if (memberExpression == null)
+        //    throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
 
-        if (!(memberExpression.Member is PropertyInfo propertyInfo))
-            throw new ArgumentException($"Expression '{expression}' refers to a field, not a property.");
+        //if (!(memberExpression.Member is PropertyInfo propertyInfo))
+        //    throw new ArgumentException($"Expression '{expression}' refers to a field, not a property.");
 
-        return propertyInfo.Name;
+        //return propertyInfo.Name;
+
+        // Handle more complex expressions by extracting property references
+        var propertyVisitor = new PropertyReferenceVisitor();
+
+        propertyVisitor.Visit(expression);
+
+        if (propertyVisitor.PropertyNames.Count > 0)
+        {
+            return string.Join("_", propertyVisitor.PropertyNames);
+        }
+
+        // If we couldn't extract any property, generate a safe name based on the expression
+        return $"Expr_{Math.Abs(expression.ToString().GetHashCode())}";
+    }
+
+    // Helper class to extract property names from expressions
+    private class PropertyReferenceVisitor : ExpressionVisitor
+    {
+        public List<string> PropertyNames { get; } = [];
+
+        protected override Expression VisitMember(MemberExpression node)
+        {
+            if (node.Member is PropertyInfo propertyInfo)
+            {
+                PropertyNames.Add(propertyInfo.Name);
+            }
+
+            return base.VisitMember(node);
+        }
     }
 }
