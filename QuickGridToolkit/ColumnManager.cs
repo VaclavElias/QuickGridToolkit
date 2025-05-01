@@ -140,7 +140,7 @@ public class ColumnManager<TGridItem>
         string? @class = null,
         Align align = Align.Center,
         Dictionary<TValue, string>? customStyling = null)
-        => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
+            => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, ColumnInfo columnInfo, Align align = Align.Left, GridSort<TGridItem>? sortBy = null,
         bool visible = true, Func<TGridItem, Task>? onClick = null)
@@ -457,52 +457,24 @@ public class ColumnManager<TGridItem>
         };
     }
 
-    /// <summary>
-    /// Adds a simple date column to the grid based on a specified expression.
-    /// </summary>
-    /// <param name="expression">An expression to determine the property of the grid item to display.</param>
-    /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
-    /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
-    [Obsolete("Use AddSimpleDate2 instead.", true)]
-    public void AddSimpleDate(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, string format = "dd/MM/yyyy")
-    {
-        var compiledExpression = expression.Compile();
-
-        Add(new()
-        {
-            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
-            FullTitle = fullTitle,
-            ChildContent = (item) => (builder) =>
-            {
-                var value = compiledExpression.Invoke(item);
-                var displayValue = value switch
-                {
-                    DateTime date => date.ToString(format),
-                    DateOnly dateOnly => dateOnly.ToString(format),
-                    _ => default
-                };
-                builder.AddContent(0, displayValue);
-            },
-            SortBy = GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
-            ColumnType = typeof(TemplateColumn<TGridItem>),
-            Format = format
-        });
-    }
-
     public void AddTickColumn(
         Expression<Func<TGridItem, object?>> expression,
         string? title = null,
         string? fullTitle = null,
-        Align align = Align.Center)
+        Align align = Align.Center,
+        bool showOnlyTrue = false)
     {
-        Add(new()
+        var column = new TickPropertyColumn<TGridItem>()
         {
             Property = expression,
             Title = title,
             FullTitle = fullTitle,
             ColumnType = typeof(TickColumn<TGridItem>),
-            Align = align
-        });
+            Align = align,
+            ShowOnlyTrue = showOnlyTrue,
+        };
+
+        Add(column);
     }
 
     public void AddImageColumn(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, string? @class = null)

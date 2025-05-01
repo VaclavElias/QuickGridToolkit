@@ -16,12 +16,13 @@
                              Class="@col.Class"
                              Property="@col.Property" />
             }
-            else if (col.ColumnType == typeof(TickColumn<TGridItem>))
+            else if (col.ColumnType == typeof(TickColumn<TGridItem>) && col is TickPropertyColumn<TGridItem> tickPropertyColumn)
             {
                 <TickColumn TGridItem="TGridItem" Title="@col.Title"
                             Align="@col.Align"
                             Class="@col.Class"
                             Property="@col.Property"
+                            ShowOnlyTrue="@tickPropertyColumn.ShowOnlyTrue"
                             Sortable="true" />
             }
             else if (col.ColumnType == typeof(TemplateColumn<TGridItem>))

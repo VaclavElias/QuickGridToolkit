@@ -10,6 +10,7 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
     }
 
     [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
+    [Parameter] public bool ShowOnlyTrue { get; set; }
 
     private Expression<Func<TGridItem, object>>? _lastAssignedProperty;
     private Func<TGridItem, object?>? _cellTextFunc;
@@ -20,6 +21,13 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
     protected override void CellContent(RenderTreeBuilder builder, TGridItem item)
     {
         var isTrue = _cellTextFunc!(item)?.ToString() == "True";
+
+        if (ShowOnlyTrue && !isTrue)
+        {
+            builder.AddContent(0, string.Empty);
+
+            return;
+        }
 
         builder.AddMarkupContent(2, $"<i class=\"far fa-{(isTrue ? "check" : "times")} text-{(isTrue ? "success" : "danger")}\"></i>");
     }
@@ -36,33 +44,6 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
 
             _sortBuilder = GridSort<TGridItem>.ByAscending(Property);
         }
-
-        // It seems we don't need this below title extraction?
-
-        //if (Title is not null) return;
-
-        //MemberExpression? memberExpression;
-
-        //if (Property.Body is UnaryExpression unaryExpression)
-        //{
-        //    memberExpression = unaryExpression.Operand as MemberExpression;
-        //}
-        //else
-        //{
-        //    memberExpression = Property.Body as MemberExpression;
-        //}
-
-        //if (memberExpression == null)
-        //{
-        //    throw new ArgumentException($"Expression '{Property}' refers to a method, not a property.");
-        //}
-
-        //if (memberExpression.Member is not PropertyInfo propertyInfo)
-        //{
-        //    throw new ArgumentException($"Expression '{Property}' refers to a field, not a property.");
-        //}
-
-        //Title = propertyInfo.Name;
 
         if (Title is null && Property.Body is MemberExpression memberExpression)
         {
