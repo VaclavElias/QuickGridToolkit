@@ -263,9 +263,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a decimal numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right)
+    public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right, bool visible = true)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, visible: visible);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -284,9 +284,9 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Adds a double numeric column to the grid.
     /// </summary>
-    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right)
+    public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right, bool visible = true)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
+        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, visible: visible);
 
         column.ChildContent = (item) => (builder) =>
         {
@@ -384,7 +384,7 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
-    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null) => new()
+    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null, bool visible = true) => new()
     {
         Title = title ?? GetPropertyName(expression),
         SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(expression),
@@ -392,6 +392,7 @@ public class ColumnManager<TGridItem>
         Align = align,
         FullTitle = fullTitle,
         Class = @class,
+        Visible = visible,
         Property = ConvertExpressionToObject(expression)
     };
 
