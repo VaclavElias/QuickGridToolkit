@@ -139,8 +139,9 @@ public class ColumnManager<TGridItem>
         string? format = "dd/MM/yyyy",
         string? @class = null,
         Align align = Align.Center,
-        Dictionary<TValue, string>? customStyling = null)
-            => AddSimple(expression, title, fullTitle, format, @class, align, customStyling);
+        Dictionary<TValue, string>? cellStyle = null,
+        bool visible = true)
+            => AddSimple(expression, title, fullTitle, format, @class, align, cellStyle, visible: visible);
 
     public void AddAction(Expression<Func<TGridItem, object?>> expression, ColumnInfo columnInfo, Align align = Align.Left, GridSort<TGridItem>? sortBy = null,
         bool visible = true, Func<TGridItem, Task>? onClick = null)
@@ -447,6 +448,7 @@ public class ColumnManager<TGridItem>
         }
     }
 
+    // Seems to be working
     // where TValue : notnull
     private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null)
     {
