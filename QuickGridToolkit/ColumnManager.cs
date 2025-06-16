@@ -464,6 +464,7 @@ public class ColumnManager<TGridItem>
         Expression<Func<TGridItem, object?>> expression,
         string? title = null,
         string? fullTitle = null,
+        string? @class = null,
         Align align = Align.Center,
         bool showOnlyTrue = false)
     {
@@ -475,6 +476,7 @@ public class ColumnManager<TGridItem>
             ColumnType = typeof(TickColumn<TGridItem>),
             Align = align,
             ShowOnlyTrue = showOnlyTrue,
+            Class = @class,
         };
 
         Add(column);
