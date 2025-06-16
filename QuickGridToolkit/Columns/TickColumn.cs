@@ -21,6 +21,13 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
     protected override void CellContent(RenderTreeBuilder builder, TGridItem item)
     {
         var isTrue = _cellTextFunc!(item)?.ToString() == "True";
+        var isNull = _cellTextFunc!(item) is null;
+
+        if (isNull)
+        {
+            builder.AddContent(0, string.Empty);
+            return;
+        }
 
         if (ShowOnlyTrue && !isTrue)
         {
