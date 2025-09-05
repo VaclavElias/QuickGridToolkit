@@ -1,7 +1,0 @@
-<Solution>
-  <Folder Name="/Solution Items/">
-    <File Path="README.md" />
-  </Folder>
-  <Project Path="BlazorApp1/BlazorApp1/BlazorApp1.csproj" />
-  <Project Path="QuickGridToolkit/QuickGridToolkit.csproj" />
-</Solution>
