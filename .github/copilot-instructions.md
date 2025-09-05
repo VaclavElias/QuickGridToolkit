@@ -1,13 +1,14 @@
-# Copilot for QuickGridToolkit Blazor Library
+# Copilot for QuickGrid.Toolkit Blazor Library
 
-These repository instructions guide GitHub Copilot to assist development in the QuickGridToolkit library and its demo app.
+These repository instructions guide GitHub Copilot to assist development in the QuickGrid.Toolkit library and its demo app.
 
 ## Project Overview
 
 This repository contains:
 
-- `QuickGridToolkit`: a Blazor components and utilities library.
-- `BlazorApp1`: a demo Blazor Web App (server interactivity) showcasing QuickGridToolkit.
+- `QuickGrid.Toolkit`: a Blazor components and utilities library.
+- `QuickGrid.Samples`: a demo Blazor Web App (server interactivity) showcasing QuickGrid.Toolkit.
+- `BlazorApp1`: an old demo Blazor Web App
 
 The solution follows a clean, layered architecture pattern.
 
@@ -22,8 +23,8 @@ The solution follows a clean, layered architecture pattern.
 
 ## Folder Structure
 
-- `/QuickGridToolkit`: Shared core functionality (components, utilities).
-- `/BlazorApp1`: Demo Blazor app using QuickGridToolkit.
+- `/src/QuickGrid.Toolkit`: Shared core functionality (components, utilities).
+- `/src/QuickGrid.Samples`: Demo Blazor app using QuickGrid.Toolkit.
 
 ## Coding Style & Conventions
 
@@ -43,13 +44,13 @@ The solution follows a clean, layered architecture pattern.
 
 - Blazor-first for new UI work.
 - For complex components, use .razor + code-behind .razor.cs partial classes.
-- Use QuickGrid and QuickGridToolkit for data grids rather than introducing new grid libraries.
+- Use QuickGrid and QuickGrid.Toolkit for data grids rather than introducing new grid libraries.
 - Keep JS interop minimal; prefer native Blazor/.NET patterns.
 
 ## Key Projects (Awareness)
 
-- `QuickGridToolkit`: shared foundational logic (components/utilities).
-- `BlazorApp1`: demo Blazor Web App (server interactivity) using QuickGridToolkit.
+- `QuickGrid.Toolkit`: shared foundational logic (components/utilities).
+- `QuickGrid.Samples`: demo Blazor Web App (server interactivity) using QuickGrid.Toolkit.
 
 ## External APIs
 
