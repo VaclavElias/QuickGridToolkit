@@ -2,6 +2,162 @@ using System.Globalization;
 
 namespace QuickGrid.Toolkit;
 
+/// <summary>
+/// Represents a cell style mapping for a specific value.
+/// </summary>
+/// <typeparam name="TValue">The type of the value to style</typeparam>
+/// <param name="Value">The value to match</param>
+/// <param name="Style">The style to apply</param>
+public record CellStyle<TValue>(TValue Value, string Style);
+
+/// <summary>
+/// Provides styling mappings for cell values, including support for null values.
+/// </summary>
+/// <typeparam name="TValue">The type of values to map</typeparam>
+public class CellStyleMap<TValue>
+{
+    private readonly List<CellStyle<TValue>> _styleMappings = [];
+    private string? _nullValueStyle;
+
+    /// <summary>
+    /// Adds a style mapping for a specific value.
+    /// </summary>
+    /// <param name="value">The value to map</param>
+    /// <param name="style">The style to apply</param>
+    /// <returns>This instance for method chaining</returns>
+    public CellStyleMap<TValue> Add(TValue value, string style)
+    {
+        if (value is null)
+        {
+            _nullValueStyle = style;
+        }
+        else
+        {
+            _styleMappings.Add(new CellStyle<TValue>(value, style));
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Adds multiple style mappings.
+    /// </summary>
+    /// <param name="mappings">The mappings to add</param>
+    /// <returns>This instance for method chaining</returns>
+    public CellStyleMap<TValue> AddRange(IEnumerable<CellStyle<TValue>> mappings)
+    {
+        _styleMappings.AddRange(mappings);
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the style to use for null values.
+    /// </summary>
+    /// <param name="style">The style to apply to null values</param>
+    /// <returns>This instance for method chaining</returns>
+    public CellStyleMap<TValue> SetNullStyle(string style)
+    {
+        _nullValueStyle = style;
+        return this;
+    }
+
+    /// <summary>
+    /// Gets the style for a given value.
+    /// </summary>
+    /// <param name="value">The value to get the style for</param>
+    /// <returns>The style string, or empty string if no mapping exists</returns>
+    public string GetStyle(TValue? value)
+    {
+        if (value is null)
+        {
+            return _nullValueStyle ?? string.Empty;
+        }
+
+        var mapping = _styleMappings.FirstOrDefault(m => EqualityComparer<TValue>.Default.Equals(m.Value, value));
+        return mapping?.Style ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Checks if a mapping exists for the given value.
+    /// </summary>
+    /// <param name="value">The value to check</param>
+    /// <returns>True if a mapping exists</returns>
+    public bool ContainsValue(TValue? value)
+    {
+        if (value is null)
+        {
+            return _nullValueStyle is not null;
+        }
+
+        return _styleMappings.Any(m => EqualityComparer<TValue>.Default.Equals(m.Value, value));
+    }
+
+    /// <summary>
+    /// Creates a CellStyleMap from a collection of CellStyle mappings.
+    /// </summary>
+    /// <param name="mappings">The style mappings</param>
+    /// <param name="nullValueStyle">Optional style for null values</param>
+    /// <returns>A new CellStyleMap instance</returns>
+    public static CellStyleMap<TValue> FromMappings(IEnumerable<CellStyle<TValue>> mappings, string? nullValueStyle = null)
+    {
+        var map = new CellStyleMap<TValue>();
+        map.AddRange(mappings);
+
+        if (nullValueStyle is not null)
+        {
+            map.SetNullStyle(nullValueStyle);
+        }
+
+        return map;
+    }
+
+    /// <summary>
+    /// Clears all mappings. Optionally clears the null value style.
+    /// </summary>
+    /// <param name="clearNullStyle">When true, also clears the null value style.</param>
+    /// <returns>This instance for method chaining</returns>
+    public CellStyleMap<TValue> Clear(bool clearNullStyle = true)
+    {
+        _styleMappings.Clear();
+        if (clearNullStyle) _nullValueStyle = null;
+        return this;
+    }
+
+    /// <summary>
+    /// Replaces all mappings (and optional null style) in one step.
+    /// </summary>
+    /// <param name="mappings">New mappings</param>
+    /// <param name="nullValueStyle">Optional style for null values</param>
+    /// <returns>This instance for method chaining</returns>
+    public CellStyleMap<TValue> ReplaceWith(IEnumerable<CellStyle<TValue>> mappings, string? nullValueStyle = null)
+    {
+        _styleMappings.Clear();
+        _styleMappings.AddRange(mappings);
+        _nullValueStyle = nullValueStyle;
+        return this;
+    }
+
+    /// <summary>
+    /// Removes the mapping for the given value. When value is null, clears the null style.
+    /// </summary>
+    public bool Remove(TValue? value)
+    {
+        if (value is null)
+        {
+            var hadNull = _nullValueStyle is not null;
+            _nullValueStyle = null;
+            return hadNull;
+        }
+
+        var idx = _styleMappings.FindIndex(m => EqualityComparer<TValue>.Default.Equals(m.Value, value));
+        if (idx >= 0)
+        {
+            _styleMappings.RemoveAt(idx);
+            return true;
+        }
+        return false;
+    }
+}
+
 public class ColumnManager<TGridItem>
 {
     private const string MissingTitle = "Title n/a";
@@ -14,20 +170,12 @@ public class ColumnManager<TGridItem>
     public bool IsIndexColumn { get; set; } = true;
     public List<DynamicColumn<TGridItem>> Columns { get; } = [];
     public List<FooterColumn<IEnumerable<TGridItem>>> FooterColumns { get; } = [];
-    //public List<string> VisibleColumns { get; } = [];
-    //public QuickGridColumns QuickGridColumns { get; } = new();
 
     /// <summary>
     /// Returns visible columns
     /// </summary>
     /// <returns></returns>
     public IEnumerable<DynamicColumn<TGridItem>> Get() => Columns.Where(w => w.Visible);
-
-    //public void SetVisibleColumns(IEnumerable<string> columns)
-    //{
-    //    VisibleColumns.Clear();
-    //    VisibleColumns.AddRange(columns);
-    //}
 
     public void Add(DynamicColumn<TGridItem>? column = default)
     {
@@ -39,34 +187,17 @@ public class ColumnManager<TGridItem>
         if (string.IsNullOrEmpty(column.PropertyName))
             column.PropertyName = GetPropertyNameNew(column.Property);
 
-        //SetColumnVisibility(column);
-
         Columns.Add(column);
 
         column.Id = Columns.Count;
     }
-
-    //private void SetColumnVisibility(DynamicColumn<TGridItem> column)
-    //{
-    //    if (VisibleColumns.Count == 0 || column.FullTitle is null) return;
-
-    //    column.Visible = VisibleColumns.Contains(column.FullTitle);
-    //}
-
-    //public void ResetColumnVisibility()
-    //{
-    //    foreach (var column in Columns)
-    //    {
-    //        SetColumnVisibility(column);
-    //    }
-    //}
 
     public void AddSimple<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
         ColumnInfo columnInfo,
         string? format = null,
         Align align = Align.Left,
-        Dictionary<TValue, string>? cellStyle = null,
+        CellStyleMap<TValue>? cellStyle = null,
         GridSort<TGridItem>? sortBy = null,
         bool visible = true,
         string? propertyName = null)
@@ -76,7 +207,7 @@ public class ColumnManager<TGridItem>
 
     /// <summary>
     /// Adds a simple date column to the grid based on a specified expression.
-    /// </summary>
+    /// /// </summary>
     /// <param name="expression">An expression to determine the property of the grid item to display.</param>
     /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
     /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
@@ -87,7 +218,7 @@ public class ColumnManager<TGridItem>
         string? format = null,
         string? @class = null,
         Align align = Align.Left,
-        Dictionary<TValue, string>? cellStyle = null,
+        CellStyleMap<TValue>? cellStyle = null,
         GridSort<TGridItem>? sortBy = null,
         bool visible = true,
         string? propertyName = null,
@@ -120,7 +251,7 @@ public class ColumnManager<TGridItem>
                 }
                 else if (cellStyle != null)
                 {
-                    builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, cellStyle)}\">{displayValue}</span>");
+                    builder.AddMarkupContent(0, $"<span content=\"{cellStyle.GetStyle(value)}\">{displayValue}</span>");
                 }
                 else
                 {
@@ -143,7 +274,7 @@ public class ColumnManager<TGridItem>
         string? format = "dd/MM/yyyy",
         string? @class = null,
         Align align = Align.Center,
-        Dictionary<TValue, string>? cellStyle = null,
+        CellStyleMap<TValue>? cellStyle = null,
         bool visible = true)
             => AddSimple(expression, title, fullTitle, format, @class, align, cellStyle, visible: visible);
 
@@ -330,7 +461,7 @@ public class ColumnManager<TGridItem>
         string format = "N0",
         Align align = Align.Right,
         bool visible = true,
-        Dictionary<TValue, string>? cellStyle = null,
+        CellStyleMap<TValue>? cellStyle = null,
         Func<TGridItem, Task>? onClick = null) where TValue : struct, IFormattable
         => AddStyledNumber(expression, columnInfo.Title, columnInfo.FullTitle, format, columnInfo.Class, align, visible, cellStyle, onClick, columnInfo.PropertyName);
 
@@ -342,7 +473,7 @@ public class ColumnManager<TGridItem>
         string? @class = null,
         Align align = Align.Right,
         bool visible = true,
-        Dictionary<TValue, string>? cellStyle = null,
+        CellStyleMap<TValue>? cellStyle = null,
         Func<TGridItem, Task>? onClick = null,
         string? propertyName = null) where TValue : struct, IFormattable
     {
@@ -370,7 +501,18 @@ public class ColumnManager<TGridItem>
                 }
             }
             else
-                builder.AddContent(0, string.Empty);
+            {
+                // Handle null case with cellStyle
+                var nullStyle = cellStyle?.GetStyle(default(TValue)) ?? string.Empty;
+                if (!string.IsNullOrEmpty(nullStyle))
+                {
+                    builder.AddMarkupContent(0, $"<span content=\"{nullStyle}\"></span>");
+                }
+                else
+                {
+                    builder.AddContent(0, string.Empty);
+                }
+            }
         };
 
         column.Visible = visible;
@@ -414,12 +556,24 @@ public class ColumnManager<TGridItem>
         return convertedExpression;
     }
 
-    private static string DetermineNumericValueNature<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null) where TValue : struct
+    private static string DetermineNumericValueNature<TValue>(TValue? value, CellStyleMap<TValue>? cellStyle = null) where TValue : struct
     {
+        // First check for custom styling
+        if (cellStyle != null)
+        {
+            if (value.HasValue && cellStyle.ContainsValue(value.Value))
+            {
+                return cellStyle.GetStyle(value.Value);
+            }
+            if (!value.HasValue && cellStyle.ContainsValue(default(TValue)))
+            {
+                return cellStyle.GetStyle(default(TValue));
+            }
+        }
+
+        // Default numeric value nature determination
         switch (value)
         {
-            case TValue customValue when cellStyle?.ContainsKey(customValue) == true:
-                return cellStyle[customValue];
             case null:
                 return NoValueDescription;
             case int intValue when intValue < 0:
@@ -439,14 +593,9 @@ public class ColumnManager<TGridItem>
         }
     }
 
-    private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null)
+    private static string DetermineValueStyling<TValue>(TValue? value, CellStyleMap<TValue>? cellStyle = null)
     {
-        return value switch
-        {
-            null => "",
-            var customValue when cellStyle?.ContainsKey(customValue) == true => cellStyle[customValue],
-            _ => "",
-        };
+        return cellStyle?.GetStyle(value) ?? string.Empty;
     }
 
     public void AddTickColumn(
@@ -501,11 +650,6 @@ public class ColumnManager<TGridItem>
     {
         Add(new() { ChildContent = childContent, ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, FullTitle = fullTitle, SortBy = sortBy, Class = cssClass });
     }
-
-    //public void AddTemplateColumn2(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, GridSort<TGridItem>? sortBy = null)
-    //{
-    //    Add(new() { ChildContent = QuickGridColumns.GetActionColumn(expression), ColumnType = typeof(TemplateColumn<TGridItem>), Title = title, Align = align, SortBy = sortBy });
-    //}
 
     public void AddIndexColumn(string title = "#", Align align = Align.Center)
         => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align });
@@ -597,7 +741,6 @@ public class ColumnManager<TGridItem>
 
         AddFooterColumn(
             column.Id,
-            //items => items.Select(item => compiledExpression(item)).Sum(Convert.ToDecimal),
             items => items.Sum(item => Convert.ToDecimal(compiledExpression(item))),
             format: "N0",
             @class: column.Class?.Replace(removeClass, "")
@@ -645,21 +788,6 @@ public class ColumnManager<TGridItem>
 
         if (body is MemberExpression memberExpression1 && memberExpression1.Member is PropertyInfo propertyInfo1)
             return propertyInfo1.Name;
-
-        //MemberExpression? memberExpression;
-
-        //if (expression.Body is UnaryExpression unaryExpression)
-        //    memberExpression = unaryExpression.Operand as MemberExpression;
-        //else
-        //    memberExpression = expression.Body as MemberExpression;
-
-        //if (memberExpression == null)
-        //    throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
-
-        //if (!(memberExpression.Member is PropertyInfo propertyInfo))
-        //    throw new ArgumentException($"Expression '{expression}' refers to a field, not a property.");
-
-        //return propertyInfo.Name;
 
         // Handle more complex expressions by extracting property references
         var propertyVisitor = new PropertyReferenceVisitor();
