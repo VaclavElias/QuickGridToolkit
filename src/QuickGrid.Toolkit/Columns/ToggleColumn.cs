@@ -8,10 +8,10 @@ public class ToggleColumn<TGridItem> : ColumnBase<TGridItem>
         set => throw new NotSupportedException($"PropertyColumn generates this member internally. For custom sorting rules, see '{typeof(TemplateColumn<TGridItem>)}'.");
     }
 
-    [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
-    [Parameter] public EventCallback<TGridItem?>? OnChange { get; set; }
+    [Parameter] public Expression<Func<TGridItem, object?>> Property { get; set; } = default!;
+    [Parameter] public Func<TGridItem, Task>? OnChangeAsync { get; set; }
 
-    private Expression<Func<TGridItem, object>>? _lastAssignedProperty;
+    private Expression<Func<TGridItem, object?>>? _lastAssignedProperty;
     private Func<TGridItem, object?>? _cellTextFunc;
     private GridSort<TGridItem>? _sortBuilder;
 
@@ -22,30 +22,14 @@ public class ToggleColumn<TGridItem> : ColumnBase<TGridItem>
         var isTrue = _cellTextFunc!(item)?.ToString() == "True";
         var isNull = _cellTextFunc!(item) is null;
 
-        //if (isNull)
-        //{
-        //    builder.AddContent(0, string.Empty);
-        //    return;
-        //}
-
-        //if (ShowOnlyTrue && !isTrue)
-        //{
-        //    builder.AddContent(0, string.Empty);
-        //    return;
-        //}
-
         isTrue = isTrue && !isNull;
 
         builder.OpenElement(0, "div");
         builder.AddAttribute(1, "class", "form-switch d-inline-block");
         builder.OpenElement(2, "input");
-        if (OnChange is not null)
+        if (OnChangeAsync is not null)
         {
-            builder.AddAttribute(3, "onchange", EventCallback.Factory.Create(this, () =>
-            {
-                Console.WriteLine($"ToggleColumn clicked for item: {item}");
-                OnChange.Value.InvokeAsync(item);
-            }));
+            builder.AddAttribute(3, "onchange", EventCallback.Factory.Create<ChangeEventArgs>(this, () => OnChangeAsync.Invoke(item)));
         }
         builder.AddAttribute(4, "class", "form-check-input");
         builder.AddAttribute(5, "type", "checkbox");
@@ -56,9 +40,6 @@ public class ToggleColumn<TGridItem> : ColumnBase<TGridItem>
         }
         builder.CloseElement();
         builder.CloseElement();
-
-        // form-ckeck class is removed because it adds extra padding
-        //builder.AddMarkupContent(2, $"<div class=\"form-switch d-inline-block\"><input {(isTrue ? "checked" : "")} class=\"form-check-input\" type=\"checkbox\" role=\"switch\"></div>");
     }
 
     protected override void OnParametersSet()

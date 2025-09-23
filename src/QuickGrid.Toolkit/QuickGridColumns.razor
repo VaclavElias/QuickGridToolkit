@@ -30,7 +30,7 @@
                 <ToggleColumn TGridItem="TGridItem" Title="@col.Title"
                             Align="@col.Align"
                             Class="@col.Class"
-                            OnChange="@BuildToggleOnChange(dynamicColumn)"
+                            OnChangeAsync="@dynamicColumn.OnActionAsync"
                             Property="@col.Property"
                             Sortable="true" />
             }
@@ -56,17 +56,10 @@
         }
     </text>;
 
-    private static EventCallback<TItem?> BuildToggleOnChange<TItem>(DynamicColumn<TItem> dynamicColumn)
-    {
-        if (dynamicColumn.OnActionAsync is null) return default;
-
-        return EventCallback.Factory.Create<TItem?>(dynamicColumn, (TItem? i) => dynamicColumn.OnActionAsync(i!));
-    }
-
     // Not working, eventually, I would like to pass a call back function instead of using Test()
     // Also, it can't be static
     // Error: System.InvalidOperationException: The render handle is not yet assigned. This happens because of @onclick handler
-    // Temporary solution, move the GetActionColumn to a "QuickGridPageBase" and inherid this page and so this method will be available for the child pages to be reused
+    // Temporary solution, move the GetActionColumn to a "QuickGridPageBase" and inherit this page and so this method will be available for the child pages to be reused
     public RenderFragment<TGridItem> GetActionColumn<TGridItem>(Expression<Func<TGridItem, object?>> property)
     {
         var propertyName = (property.Body as MemberExpression)?.Member.Name;
