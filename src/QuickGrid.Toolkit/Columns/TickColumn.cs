@@ -32,7 +32,6 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
         if (ShowOnlyTrue && !isTrue)
         {
             builder.AddContent(0, string.Empty);
-
             return;
         }
 
