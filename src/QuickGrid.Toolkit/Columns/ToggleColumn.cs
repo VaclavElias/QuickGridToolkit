@@ -38,15 +38,15 @@ public class ToggleColumn<TGridItem> : ColumnBase<TGridItem>
 
         builder.OpenElement(0, "div");
         builder.AddAttribute(1, "class", "form-switch d-inline-block");
+        builder.OpenElement(2, "input");
         if (OnChange is not null)
         {
-            builder.AddAttribute(2, "onchange", EventCallback.Factory.Create(this, () =>
+            builder.AddAttribute(3, "onchange", EventCallback.Factory.Create(this, () =>
             {
                 Console.WriteLine($"ToggleColumn clicked for item: {item}");
                 OnChange.Value.InvokeAsync(item);
             }));
         }
-        builder.OpenElement(3, "input");
         builder.AddAttribute(4, "class", "form-check-input");
         builder.AddAttribute(5, "type", "checkbox");
         builder.AddAttribute(6, "role", "switch");

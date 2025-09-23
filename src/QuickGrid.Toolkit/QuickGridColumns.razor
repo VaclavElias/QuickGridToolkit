@@ -30,7 +30,7 @@
                 <ToggleColumn TGridItem="TGridItem" Title="@col.Title"
                             Align="@col.Align"
                             Class="@col.Class"
-                            OnChange="null"
+                            OnChange="@BuildToggleOnChange(dynamicColumn)"
                             Property="@col.Property"
                             Sortable="true" />
             }
@@ -55,6 +55,13 @@
             }
         }
     </text>;
+
+    private static EventCallback<TItem?> BuildToggleOnChange<TItem>(DynamicColumn<TItem> dynamicColumn)
+    {
+        if (dynamicColumn.OnActionAsync is null) return default;
+
+        return EventCallback.Factory.Create<TItem?>(dynamicColumn, (TItem? i) => dynamicColumn.OnActionAsync(i!));
+    }
 
     // Not working, eventually, I would like to pass a call back function instead of using Test()
     // Also, it can't be static
