@@ -166,7 +166,12 @@ public class ColumnManager<TGridItem>
         });
     }
 
-    public void AddAction(string staticContent, string? title = null, Align align = Align.Left, string? @class = null, Func<TGridItem, Task>? onClick = null)
+    public void AddAction(
+        string staticContent,
+        string? title = null,
+        Align align = Align.Left,
+        string? @class = null,
+        Func<TGridItem, Task>? onClick = null)
     {
         Add(new()
         {
@@ -454,6 +459,27 @@ public class ColumnManager<TGridItem>
         Add(column);
     }
 
+    public void AddToggleColumn(
+        Expression<Func<TGridItem, object?>> expression,
+        string? title = null,
+        string? fullTitle = null,
+        string? @class = "text-center",
+        Align align = Align.Center,
+        Func<TGridItem, Task>? onChange = null)
+    {
+
+        Add(new()
+        {
+            Property = expression,
+            Title = title,
+            FullTitle = fullTitle,
+            ColumnType = typeof(ToggleColumn<TGridItem>),
+            Align = align,
+            Class = @class,
+            OnActionAsync = onChange
+        });
+    }
+
     public void AddImageColumn(Expression<Func<TGridItem, object?>> expression, string? title = null, Align align = Align.Center, string? @class = null)
     {
         Add(new() { Property = expression, ColumnType = typeof(ImageColumn<TGridItem>), Title = title, Align = align, Class = @class });
@@ -497,12 +523,12 @@ public class ColumnManager<TGridItem>
     }
 
     public void AddFooterColumn(
-    int id,
-    object? value,
-    string? format = null,
-    string? @class = null,
-    Align align = Align.Left,
-    bool visible = true)
+        int id,
+        object? value,
+        string? format = null,
+        string? @class = null,
+        Align align = Align.Left,
+        bool visible = true)
     {
         FooterColumn<IEnumerable<TGridItem>> column = new()
         {

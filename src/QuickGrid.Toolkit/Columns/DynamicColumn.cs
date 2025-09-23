@@ -33,6 +33,7 @@ public class DynamicColumn<TGridItem>
     public RenderFragment<TGridItem> ChildContent { get; set; } = EmptyChildContent;
     public GridSort<TGridItem>? SortBy { get; set; }
     public Action? OnClick { get; set; }
+    public Func<TGridItem, Task>? OnActionAsync { get; set; }
 
     public Type ColumnType { get; set; } = typeof(PropertyColumn<TGridItem, object?>);
 }

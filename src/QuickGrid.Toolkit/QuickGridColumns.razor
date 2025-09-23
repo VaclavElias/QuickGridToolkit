@@ -25,6 +25,15 @@
                             ShowOnlyTrue="@tickPropertyColumn.ShowOnlyTrue"
                             Sortable="true" />
             }
+            else if (col.ColumnType == typeof(ToggleColumn<TGridItem>) && col is DynamicColumn<TGridItem> dynamicColumn)
+            {
+                <ToggleColumn TGridItem="TGridItem" Title="@col.Title"
+                            Align="@col.Align"
+                            Class="@col.Class"
+                            OnChange="null"
+                            Property="@col.Property"
+                            Sortable="true" />
+            }
             else if (col.ColumnType == typeof(TemplateColumn<TGridItem>))
             {
                 <TemplateColumn TGridItem="TGridItem" Title="@col.Title"
@@ -65,4 +74,8 @@
     }
 
     public static RenderFragment MarkupColumn(MarkupString markupString) => @<text>@markupString</text>;
+
+    // Fix for RZ9986 and CS0026
+    // Store the EventCallback in a variable in the component's code block
+
 }
