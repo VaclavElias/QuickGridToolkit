@@ -69,7 +69,7 @@ public class ColumnManager<TGridItem>
         Dictionary<TValue, string>? cellStyle = null,
         GridSort<TGridItem>? sortBy = null,
         bool visible = true,
-        string? propertyName = null) // where TValue : notnull, let's have warning for now here, instead of callers
+        string? propertyName = null)
     {
         AddSimple(expression, columnInfo.Title, columnInfo.FullTitle, format, columnInfo.Class, align, cellStyle, sortBy, visible, propertyName);
     }
@@ -90,7 +90,8 @@ public class ColumnManager<TGridItem>
         Dictionary<TValue, string>? cellStyle = null,
         GridSort<TGridItem>? sortBy = null,
         bool visible = true,
-        string? propertyName = null) // where TValue : notnull, let's have warning for now here, instead of callers
+        string? propertyName = null,
+        bool? addToContent = null)
     {
         DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, sortBy);
 
@@ -101,7 +102,9 @@ public class ColumnManager<TGridItem>
             var value = expression.Compile().Invoke(item);
 
             if (value is null)
+            {
                 builder.AddContent(0, string.Empty);
+            }
             else
             {
                 string displayValue;
@@ -111,7 +114,18 @@ public class ColumnManager<TGridItem>
                 else
                     displayValue = $"{value}";
 
-                builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, cellStyle)}\">{displayValue}</span>");
+                if (addToContent == true)
+                {
+                    builder.AddMarkupContent(0, $"<span content=\"{value}\">{displayValue}</span>");
+                }
+                else if (cellStyle != null)
+                {
+                    builder.AddMarkupContent(0, $"<span content=\"{DetermineValueStyling(value, cellStyle)}\">{displayValue}</span>");
+                }
+                else
+                {
+                    builder.AddContent(0, displayValue);
+                }
             }
         };
 
@@ -425,8 +439,6 @@ public class ColumnManager<TGridItem>
         }
     }
 
-    // Seems to be working
-    // where TValue : notnull
     private static string DetermineValueStyling<TValue>(TValue? value, Dictionary<TValue, string>? cellStyle = null)
     {
         return value switch
