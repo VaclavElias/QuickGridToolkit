@@ -496,7 +496,7 @@ public class ColumnManager<TGridItem>
     }
 
     public void AddIndexColumn(string title = "#", Align align = Align.Center)
-        => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align });
+        => Add(new() { ColumnType = typeof(EmptyColumn<TGridItem>), Title = title, Align = align, Class = "index-column" });
 
     /// <summary>
     /// Creates a shallow copy of the current list of <see cref="DynamicColumn{TGridItem}"/> objects,

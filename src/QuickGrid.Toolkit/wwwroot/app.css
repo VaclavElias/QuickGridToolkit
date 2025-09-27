@@ -1,0 +1,14 @@
+.table-index {
+    & tbody tr {
+        counter-increment: rowNumber;
+    }
+
+    & tbody td.index-column:not(.no-index) {
+        text-align: center;
+
+        &::before {
+            content: counter(rowNumber);
+            font-size: 12px
+        }
+    }
+}
