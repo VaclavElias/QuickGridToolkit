@@ -3,6 +3,9 @@ namespace QuickGrid.Toolkit.Columns;
 // source https://github.com/aspnet/AspLabs/blob/main/src/QuickGrid/src/Microsoft.AspNetCore.Components.QuickGrid/Columns/PropertyColumn.cs
 public class TickColumn<TGridItem> : ColumnBase<TGridItem>
 {
+    private const string TrueSign = "true-sign";
+    private const string FalseSign = "false-sign";
+
     public override GridSort<TGridItem>? SortBy
     {
         get => _sortBuilder;
@@ -11,8 +14,8 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
 
     [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
     [Parameter] public bool ShowOnlyTrue { get; set; }
-    [Parameter] public string? TrueClass { get; set; } = "true-sign";
-    [Parameter] public string? FalseClass { get; set; } = "false-sign";
+    [Parameter] public string? TrueClass { get; set; }
+    [Parameter] public string? FalseClass { get; set; }
 
     private Expression<Func<TGridItem, object>>? _lastAssignedProperty;
     private Func<TGridItem, object?>? _cellTextFunc;
@@ -36,7 +39,7 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
             builder.AddContent(0, string.Empty);
             return;
         }
-        var cssClass = isTrue ? TrueClass : FalseClass;
+        var cssClass = isTrue ? (TrueClass ?? TrueSign) : (FalseClass ?? FalseSign);
 
         builder.AddMarkupContent(1, $"<i class=\"{cssClass}\"></i>");
     }
