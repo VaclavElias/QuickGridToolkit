@@ -12,3 +12,15 @@
         }
     }
 }
+
+.true-sign::after {
+    content: "\2714";
+    color: green;
+    font-weight: bold;
+}
+
+.false-sign::after {
+    content: "\2716";
+    color: red;
+    font-weight: bold;
+}

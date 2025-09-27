@@ -448,6 +448,8 @@ public class ColumnManager<TGridItem>
         string? fullTitle = null,
         string? @class = null,
         Align align = Align.Center,
+        string? trueClass = null,
+        string? falseClass = null,
         bool showOnlyTrue = false)
     {
         var column = new TickPropertyColumn<TGridItem>()
@@ -458,6 +460,8 @@ public class ColumnManager<TGridItem>
             ColumnType = typeof(TickColumn<TGridItem>),
             Align = align,
             ShowOnlyTrue = showOnlyTrue,
+            TrueClass = trueClass,
+            FalseClass = falseClass,
             Class = @class,
         };
 

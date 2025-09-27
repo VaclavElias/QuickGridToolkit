@@ -11,6 +11,8 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
 
     [Parameter] public Expression<Func<TGridItem, object>> Property { get; set; } = default!;
     [Parameter] public bool ShowOnlyTrue { get; set; }
+    [Parameter] public string? TrueClass { get; set; } = "true-sign";
+    [Parameter] public string? FalseClass { get; set; } = "false-sign";
 
     private Expression<Func<TGridItem, object>>? _lastAssignedProperty;
     private Func<TGridItem, object?>? _cellTextFunc;
@@ -34,8 +36,9 @@ public class TickColumn<TGridItem> : ColumnBase<TGridItem>
             builder.AddContent(0, string.Empty);
             return;
         }
+        var cssClass = isTrue ? TrueClass : FalseClass;
 
-        builder.AddMarkupContent(2, $"<i class=\"far fa-{(isTrue ? "check" : "times")} text-{(isTrue ? "success" : "danger")}\"></i>");
+        builder.AddMarkupContent(1, $"<i class=\"{cssClass}\"></i>");
     }
 
     protected override void OnParametersSet()
