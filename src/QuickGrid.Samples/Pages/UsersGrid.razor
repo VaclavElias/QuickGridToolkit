@@ -17,9 +17,10 @@
     {
         _columnManager.AddIndexColumn();
         _columnManager.Add(new() { Property = p => p.Id });
-        _columnManager.AddSimple(p => p.Name);
+        _columnManager.AddSimple(p => p.Name, fullTitle: "Remote Working");
         _columnManager.Add(new() { Property = p => p.Age });
-		_columnManager.AddTickColumn(p => p.RemoteWorking);
+        _columnManager.AddTickColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working");
+        _columnManager.AddToggleColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working", onChange: ToggleChange);
         _columnManager.AddCountry();
 
         _items = UserService.GetUsers();
@@ -30,5 +31,14 @@
         if (_grid is null) return;
 
         await _grid.RefreshDataAsync();
+    }
+
+    private async Task ToggleChange(UserDto user)
+    {
+        user.RemoteWorking = !user.RemoteWorking;
+
+        await Task.CompletedTask;
+
+        StateHasChanged();
     }
 }
