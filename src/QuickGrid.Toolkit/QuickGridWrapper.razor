@@ -22,8 +22,10 @@
                                         @if (_selectedConfiguration is null)
                                         {
                                             @IconProvider.Render(QuickGridIcon.Tick)
-                                        }
-                                        Default
+                                        } else
+                                        {
+                                            @IconProvider.Render(QuickGridIcon.EmptyIcon)
+                                        }<span>Default</span>
                                     </button>
                                 </li>
                                 @foreach (var item in _columnConfigurations)
@@ -33,6 +35,10 @@
                                             @if (item.Id == _selectedConfiguration?.Id)
                                             {
                                                 @IconProvider.Render(QuickGridIcon.Tick)
+                                            }
+                                            else
+                                            {
+                                                @IconProvider.Render(QuickGridIcon.EmptyIcon)
                                             }
                                             @item.Name
                                         </button>

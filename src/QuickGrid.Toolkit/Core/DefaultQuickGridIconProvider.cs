@@ -18,6 +18,8 @@ public class DefaultQuickGridIconProvider : IQuickGridIconProvider
             => builder.AddMarkupContent(0, "<i class=\"bi bi-check-lg me-2 text-success\"></i>"),
         QuickGridIcon.Wrench => builder
             => builder.AddMarkupContent(0, "<i class=\"bi bi-wrench me-2\"></i>"),
+        QuickGridIcon.EmptyIcon => builder
+            => builder.AddMarkupContent(0, "<i class=\"me-2\"></i>"),
         _ => throw new NotImplementedException()
     };
 }

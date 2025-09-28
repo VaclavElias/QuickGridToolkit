@@ -10,5 +10,6 @@ public enum QuickGridIcon
     Export,
     Tick,
     ExportSelected,
-    Wrench
+    Wrench,
+    EmptyIcon
 }
