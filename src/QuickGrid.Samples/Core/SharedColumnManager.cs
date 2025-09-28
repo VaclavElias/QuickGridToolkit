@@ -1,5 +1,8 @@
 namespace QuickGrid.Samples.Core
 {
+    /// <summary>
+    /// This is just for a demonstration of a shared column manager.
+    /// </summary>
     public class SharedUserColumnManager : ColumnManager<UserDto>
     {
         public SharedUserColumnManager()
