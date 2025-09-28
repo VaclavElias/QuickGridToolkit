@@ -10,11 +10,12 @@
 
     protected override void OnInitialized()
     {
+        var sharedManager = new SharedUserColumnManager();
+
         _columnManager.AddIndexColumn();
         _columnManager.Add(new() { Property = p => p.Id });
         _columnManager.AddSimple(p => p.Name, fullTitle: "Name");
-        _columnManager.Add(new() { Property = p => p.Age });
-        _columnManager.AddTickColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working");
+        _columnManager.AddRange(sharedManager.Columns);
         _columnManager.AddToggleColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working", onChange: ToggleChange);
         _columnManager.AddCountry();
 
