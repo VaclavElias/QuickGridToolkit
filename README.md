@@ -1,35 +1,42 @@
 # QuickGrid.Toolkit
 
-This toolkit should help you to use the QuickGrid with more functionality, specifically, if the QuickGrid is used in multiple places, with similar data structure, but with different columns.
+QuickGrid.Toolkit extends the Blazor QuickGrid with reusable, dynamic column management and small UI utilities. It is especially useful when you render the same kind of data in multiple places but need different visible columns per grid.
 
-- **QuickGrid.Toolkit** is a library with additional functionality for the [QuickGrid](https://aspnet.github.io/quickgridsamples/) with this functionality
-  - ✅ Add columns to the grid dynamically
-  - ✅ Add columns selection
-  - ✅ Predefined/Strong typed columns e.g. `AddCountry()`
-  - ✅ Add columns sorting
-  - ✅ table-index
-  - ✅ table-fit
-  - ✅ table-thead-sticky
-  - ⏳ Add custom ImageColumn
-  - ⏳ Add custom TickColumn
-  - ⏳ Add clickable columns with call back
-- **QuickGrid.Samples** is a sample application that uses the QuickGridToolkit library, page Users
+- QuickGrid.Toolkit: a library that adds to the official [QuickGrid](https://aspnet.github.io/quickgridsamples/)
+  - ✅ Dynamically add columns at runtime
+  - ✅ Column selection UI (show/hide)
+  - ✅ Predefined, strongly-typed helpers (e.g., `AddCountry()`)
+  - ✅ Sorting support for added columns
+  - ✅ Utility CSS classes: `table-index`, `table-fit`, `table-thead-sticky`
+  - ⏳ Custom `ImageColumn`
+  - ⏳ Custom `TickColumn`
+  - ⏳ Clickable columns with callbacks
+- QuickGrid.Samples: a demo app showcasing the toolkit (see the Users pages)
 
 ## Requirements
 
 - .NET 10
 - Bootstrap 5
-- `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">` or alternative icons. You can use `IQuickGridIconProvider` for custom icons.
-- `<link rel="stylesheet" href="@Assets["_content/QuickGrid.Toolkit/app.css"]" />`
+- Icons: either include Bootstrap Icons
+  - `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">`
+  - or provide your own implementation of `IQuickGridIconProvider`
+- Toolkit CSS (Static Web Asset):
+  - `<link rel="stylesheet" href="@Assets["_content/QuickGrid.Toolkit/app.css"]" />`
 
-## Regular QuickGrid Example:
+## Getting started
+
+Below are two small examples. We assume you already use Blazor and QuickGrid and that you are familiar with their concepts.
+
+### Example 1: Direct `QuickGrid` with `ColumnManager<T>` (UsersGrid.razor)
+
+This pattern gives you full control of a `QuickGrid` while the toolkit manages the columns and selection UI.
 
 ```razor
-<h1>Users</h1>
+<h1>Users Grid</h1>
 <div class="my-3">
     <ColumnSelector ColumnManager="_columnManager" SelectionChanged="SelectionChangedAsync" />
 </div>
-<QuickGrid @ref="_grid" Items="@_items.AsQueryable()" Class="table table-sm table-index table-striped small table-blazor table-fit table-thead-sticky mb-0" Theme="twentyAI">
+<QuickGrid @ref="_grid" Items="@_items.AsQueryable()" Class="table table-sm table-index table-striped small table-fit table-thead-sticky mb-0" Theme="twentyAI">
     @QuickGridColumns.Columns(_columnManager)
 </QuickGrid>
 
@@ -40,10 +47,13 @@ This toolkit should help you to use the QuickGrid with more functionality, speci
 
     protected override void OnInitialized()
     {
+        var sharedManager = new SharedUserColumnManager();
+
         _columnManager.AddIndexColumn();
         _columnManager.Add(new() { Property = p => p.Id });
-        _columnManager.Add(new() { Property = p => p.Name });
-        _columnManager.Add(new() { Property = p => p.Age });
+        _columnManager.AddSimple(p => p.Name, fullTitle: "Name");
+        _columnManager.AddRange(sharedManager.Columns);
+        _columnManager.AddToggleColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working", onChange: ToggleChange);
         _columnManager.AddCountry();
 
         _items = UserService.GetUsers();
@@ -52,23 +62,74 @@ This toolkit should help you to use the QuickGrid with more functionality, speci
     private async Task SelectionChangedAsync()
     {
         if (_grid is null) return;
-
         await _grid.RefreshDataAsync();
     }
-}
 
+    private async Task ToggleChange(UserDto user)
+    {
+        user.RemoteWorking = !user.RemoteWorking;
+        await Task.CompletedTask;
+        StateHasChanged();
+    }
+}
 ```
 
-## QuickGridWrapper Example:
+Key points:
+- `ColumnManager<T>` defines all possible columns (including predefined helpers like `AddCountry()` and custom ones like `AddToggleColumn(...)`).
+- `ColumnSelector` renders a simple UI to show/hide columns; call `RefreshDataAsync` when the selection changes.
+- `QuickGridColumns.Columns(_columnManager)` renders the current set of visible columns.
 
-You would use this one if you have multiple grids with similar data structure, but different columns.
+### Example 2: `QuickGridWrapper` (UsersGridWrapper.razor)
+
+When you have multiple grids with similar data but different columns, the wrapper centralizes the grid markup while you keep per-page column configuration.
 
 ```razor
-WIP
+<QuickGridWrapper
+    Items="@_items.AsQueryable()"
+    ColumnManager="_columnManager" />
+
+@code {
+    private List<UserDto> _items = new();
+    private ColumnManager<UserDto> _columnManager = new();
+
+    protected override void OnInitialized()
+    {
+        var sharedManager = new SharedUserColumnManager();
+
+        _columnManager.AddIndexColumn();
+        _columnManager.Add(new() { Property = p => p.Id });
+        _columnManager.AddSimple(p => p.Name, fullTitle: "Name");
+        _columnManager.AddRange(sharedManager.Columns);
+        _columnManager.AddToggleColumn(p => p.RemoteWorking, "Remote", fullTitle: "Remote Working", onChange: ToggleChange);
+        _columnManager.AddCountry();
+
+        _items = UserService.GetUsers();
+    }
+
+    private async Task ToggleChange(UserDto user)
+    {
+        user.RemoteWorking = !user.RemoteWorking;
+        await Task.CompletedTask;
+        StateHasChanged();
+    }
+}
 ```
 
+Notes:
+- `QuickGridWrapper` encapsulates the base grid and styling. You pass `Items` and a configured `ColumnManager<T>`.
+- The wrapper will gain additional features over time. This README will be updated accordingly.
 
-## Current Issues
+## Utility CSS classes
 
-- [ ] The `Format` property is not working for object type
+- `table-index`: adds a compact index column when used with `AddIndexColumn()`.
+- `table-fit`: reduces padding for dense layouts.
+- `table-thead-sticky`: keeps the header row sticky.
+
+## Known issues
+
+- The `Format` property is not working for `object` type.
+
+## Samples
+
+Explore the `QuickGrid.Samples` project for working pages and configurations.
 
