@@ -7,6 +7,9 @@ This toolkit should help you to use the QuickGrid with more functionality, speci
   - ✅ Add columns selection
   - ✅ Predefined/Strong typed columns e.g. `AddCountry()`
   - ✅ Add columns sorting
+  - ✅ table-index
+  - ✅ table-fit
+  - ✅ table-thead-sticky
   - ⏳ Add custom ImageColumn
   - ⏳ Add custom TickColumn
   - ⏳ Add clickable columns with call back
@@ -15,6 +18,7 @@ This toolkit should help you to use the QuickGrid with more functionality, speci
 ## Requirements
 
 - .NET 10
+- Bootstrap 5
 - `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">` or alternative icons. You can use `IQuickGridIconProvider` for custom icons.
 - `<link rel="stylesheet" href="@Assets["_content/QuickGrid.Toolkit/app.css"]" />`
 

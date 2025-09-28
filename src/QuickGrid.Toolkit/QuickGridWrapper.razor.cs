@@ -9,6 +9,7 @@ namespace QuickGrid.Toolkit;
 public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 {
     [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Class { get; set; } = "table table-sm table-index table-striped small table-fit table-thead-sticky mb-0";
     [Parameter] public string? DownloadFileName { get; set; }
     [Parameter] public string? QuickSearch { get; set; }
     [Parameter] public IQueryable<TGridItem>? Items { get; set; }
@@ -348,12 +349,12 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private async Task ManageColumns()
     {
-        if (Events is null && IsColumnSelection)
+        if (Events?.OnResetViewToDefault is null && IsColumnSelection)
         {
             IsColumnItemsSelection = true;
         }
 
-        if (Events is null) return;
+        if (Events?.OnManageColumns is null) return;
 
         if (Id is null)
         {
@@ -362,7 +363,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
             return;
         }
 
-        await Events.OnManageColumns.InvokeAsync();
+        await Events.OnManageColumns.Value.InvokeAsync();
     }
 
     private async Task OnColumnSelectionChangedAsync(ColumnConfig? config = null)
@@ -430,7 +431,9 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
         }
     }
 
-    public string GetTableClass() => $"table table-sm {IsTableIndex()} table-striped small table-blazor table-fit table-thead-sticky table-bg-transparent mb-0";
+    //public string GetTableClass() => $"table table-sm {IsTableIndex()} table-striped small table-blazor table-fit table-thead-sticky table-bg-transparent mb-0";
+
+    public string GetTableClass() => $"{Class} {IsTableIndex()}";
 
     public string IsTableIndex() => _isTableIndex ? "table-index" : "";
 
