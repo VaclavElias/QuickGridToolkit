@@ -20,7 +20,7 @@ public class DefaultQuickGridIconProvider : IQuickGridIconProvider
         QuickGridIcon.ColumnLayout => builder
             => builder.AddMarkupContent(0, "<i class=\"bi bi-window-sidebar\"></i>"),
         QuickGridIcon.Settings => builder
-            => builder.AddMarkupContent(0, "<i class=\"fal fa-cog\"></i>"),
+            => builder.AddMarkupContent(0, "<i class=\"bi bi-gear\"></i>"),
         QuickGridIcon.Filter => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-filter\"></i>"),
         QuickGridIcon.Search => builder
@@ -28,11 +28,11 @@ public class DefaultQuickGridIconProvider : IQuickGridIconProvider
         QuickGridIcon.ClearSearch => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-times\"></i>"),
         QuickGridIcon.Export => builder
-            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export\"></i>"),
+            => builder.AddMarkupContent(0, "<i class=\"bi bi-download me-2\"></i>"),
+        QuickGridIcon.ExportSelected => builder
+            => builder.AddMarkupContent(0, "<i class=\"bi bi-download me-2\"></i>"),
         QuickGridIcon.Tick => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-check\"></i>"),
-        QuickGridIcon.ExportSelected => builder
-            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export\"></i>"),
         QuickGridIcon.Wrench => builder
             => builder.AddMarkupContent(0, "<i class=\"bi bi-wrench me-2\"></i>"),
         _ => throw new NotImplementedException()
@@ -54,11 +54,11 @@ public class FontAwesomeQuickGridIconProvider : IQuickGridIconProvider
         QuickGridIcon.ClearSearch => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-times\"></i>"),
         QuickGridIcon.Export => builder
-            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export\"></i>"),
+            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export fa-fw\"></i>"),
+        QuickGridIcon.ExportSelected => builder
+            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export fa-fw\"></i>"),
         QuickGridIcon.Tick => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-check\"></i>"),
-        QuickGridIcon.ExportSelected => builder
-            => builder.AddMarkupContent(0, "<i class=\"fal fa-file-export\"></i>"),
         QuickGridIcon.Wrench => builder
             => builder.AddMarkupContent(0, "<i class=\"fal fa-wrench fa-fw\"></i>"),
         _ => throw new NotImplementedException()

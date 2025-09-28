@@ -7,6 +7,7 @@
     }
     else
     {
+        <ColumnSelector @bind-Visible="IsColumnItemsSelection" ColumnManager="ColumnManager" SelectionChanged="RefreshDataAsync" />
         <div class="d-flex justify-content-between">
             <div class="d-flex align-items-baseline">
                 @if (IsToolbar)
@@ -31,21 +32,21 @@
                         </div>
                     }
                     <div class="dropdown">
-                        <i class="fal fa-cog action me-2" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                        <span class="action me-2" data-bs-toggle="dropdown" aria-expanded="false">@IconProvider.Render(QuickGridIcon.Settings)</span>
                         <ul class="dropdown-menu">
-                            <li><button class="dropdown-item" @onclick="ManageColumns"><i class="fal fa-wrench fa-fw me-1"></i> Manage Columns</button></li>
+                            <li><button class="dropdown-item" @onclick="ManageColumns">@IconProvider.Render(QuickGridIcon.Wrench) Manage Columns</button></li>
                             @* <AuthorizeView Policy="@Policies.Other.PreviewFeature1">
                             </AuthorizeView> *@
                             @if (IsExportEnabled)
                             {
                                 <li>
                                     <button class="dropdown-item" @onclick="ExportAsync">
-                                        <i class="fal fa-download fa-fw me-1"></i> Export CSV
+                                        @IconProvider.Render(QuickGridIcon.Export) Export CSV
                                     </button>
                                 </li>
                                 <li>
                                     <button class="dropdown-item" @onclick="ExportSelectedColumnsAsync">
-                                        <i class="fal fa-download fa-fw me-1"></i> Export CSV Selected Columns <span style="line-height:19px" class="px-1 ms-1 text-bg-warning small">Preview</span>
+                                        @IconProvider.Render(QuickGridIcon.ExportSelected) Export CSV Selected Columns <span style="line-height:19px" class="px-1 ms-1 text-bg-warning small">Preview</span>
                                     </button>
                                 </li>
                             }
@@ -86,7 +87,6 @@
                 }
             </div>
         </div>
-        <ColumnSelector Visible="IsColumnItemsSelection" ColumnManager="ColumnManager" SelectionChanged="RefreshDataAsync" />
     }
 </div>
 @if (_showFilterSection)
