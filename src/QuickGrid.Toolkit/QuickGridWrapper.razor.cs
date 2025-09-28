@@ -9,7 +9,7 @@ namespace QuickGrid.Toolkit;
 public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 {
     [Parameter] public string? Id { get; set; }
-    [Parameter] public string? Class { get; set; } = "table table-sm table-index table-striped small table-fit table-thead-sticky mb-0";
+    [Parameter] public string? Class { get; set; } = "table table-sm table-index table-striped small table-fit table-thead-sticky table-no-empty-lines mb-0";
     [Parameter] public string? DownloadFileName { get; set; }
     [Parameter] public string? QuickSearch { get; set; }
     [Parameter] public IQueryable<TGridItem>? Items { get; set; }
@@ -23,6 +23,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Parameter] public bool IsToolbar { get; set; } = true;
     [Parameter] public bool IsNestedSearch { get; set; } = true;
     [Parameter] public bool IsExportEnabled { get; set; }
+    [Parameter] public bool IsPreviewFeature { get; set; }
     [Parameter] public Func<TGridItem, object> ItemKey { get; set; } = x => x!;
     [Parameter] public EventCallback ColumnSelectionChanged { get; set; }
     [Parameter] public EventCallback<List<TGridItem>> SearchResultChanged { get; set; }

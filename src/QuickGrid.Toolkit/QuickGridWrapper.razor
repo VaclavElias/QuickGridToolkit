@@ -17,12 +17,24 @@
                         <div class="dropdown me-2">
                             <span class="action me-2" data-bs-toggle="dropdown" aria-expanded="false">@IconProvider.Render(QuickGridIcon.ColumnLayout)</span>
                             <ul class="dropdown-menu">
-                                <li><button @onclick="ResetViewToDefault" class="dropdown-item"><i class="far @(_selectedConfiguration is null ? "fa-check" : "") text-success fa-fw me-1"></i> Default</button></li>
+                                <li>
+                                    <button @onclick="ResetViewToDefault" class="dropdown-item">
+                                        @if (_selectedConfiguration is null)
+                                        {
+                                            @IconProvider.Render(QuickGridIcon.Tick)
+                                        }
+                                        Default
+                                    </button>
+                                </li>
                                 @foreach (var item in _columnConfigurations)
                                 {
                                     <li>
                                         <button @onclick="() => SelectView(item)" class="dropdown-item">
-                                            <i class="far @(item.Id == _selectedConfiguration?.Id ? "fa-check" : "") text-success fa-fw me-1"></i> @item.Name
+                                            @if (item.Id == _selectedConfiguration?.Id)
+                                            {
+                                                @IconProvider.Render(QuickGridIcon.Tick)
+                                            }
+                                            @item.Name
                                         </button>
                                     </li>
                                 }
@@ -35,8 +47,6 @@
                         <span class="action me-2" data-bs-toggle="dropdown" aria-expanded="false">@IconProvider.Render(QuickGridIcon.Settings)</span>
                         <ul class="dropdown-menu">
                             <li><button class="dropdown-item" @onclick="ManageColumns">@IconProvider.Render(QuickGridIcon.Wrench) Manage Columns</button></li>
-                            @* <AuthorizeView Policy="@Policies.Other.PreviewFeature1">
-                            </AuthorizeView> *@
                             @if (IsExportEnabled)
                             {
                                 <li>
@@ -54,7 +64,7 @@
                     </div>
                     @if (FilterSection != null && IsFilter)
                     {
-                        <i @onclick="ToggleFilterSection" class="fal fa-filters action ms-1 me-2"></i>
+                        <span @onclick="ToggleFilterSection" class="action ms-1 me-2">@IconProvider.Render(QuickGridIcon.Filter)</span>
                     }
                     @if (_isInMemorySearch)
                     {

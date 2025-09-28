@@ -26,6 +26,12 @@
     width: fit-content;
 }
 
+.table-no-empty-lines {
+    tbody tr:not([aria-rowindex]) {
+        display: none;
+    }
+}
+
 .true-sign::after {
     content: "\2714";
     color: green;
