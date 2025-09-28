@@ -11,9 +11,10 @@
                 </div>
             }
         </div>
-        <p class="mt-1">
+        <p class="mt-2">
             <button class="btn btn-sm btn-light" @onclick="UncheckAll">Uncheck all</button>
             <button class="btn btn-sm btn-light ms-2" @onclick="CheckAll">Check all</button>
+            <button class="btn btn-sm btn-light ms-4" @onclick="Close">Close</button>
             @* <small>Drag and drop to reorder columns</small> *@
         </p>
     </div>
@@ -22,6 +23,7 @@
     [Parameter] public bool Visible { get; set; } = true;
     [Parameter] public ColumnManager<TGridItem>? ColumnManager { get; set; }
     [Parameter] public EventCallback SelectionChanged { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
 
     private Task HandleChangeAsync() => SelectionChanged.InvokeAsync();
 
@@ -47,5 +49,11 @@
         }
 
         SelectionChanged.InvokeAsync();
+    }
+
+    private void Close()
+    {
+        Visible = false;
+        VisibleChanged.InvokeAsync(Visible);
     }
 }
