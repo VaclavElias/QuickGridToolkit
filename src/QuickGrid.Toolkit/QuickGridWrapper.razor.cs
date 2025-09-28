@@ -24,13 +24,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Parameter] public Func<TGridItem, object> ItemKey { get; set; } = x => x!;
     [Parameter] public EventCallback ColumnSelectionChanged { get; set; }
     [Parameter] public EventCallback<List<TGridItem>> SearchResultChanged { get; set; }
-    [Parameter] public EventCallback<string> WarningRequested { get; set; }
-    [Parameter] public EventCallback<ColumnConfig> OnSelectView { get; set; }
-    [Parameter] public EventCallback OnManageColumns { get; set; }
-    [Parameter] public EventCallback OnResetViewToDefault { get; set; }
-    [Parameter] public EventCallback<IQueryable<TGridItem>> OnExport { get; set; }
-    [Parameter] public EventCallback<IEnumerable<IDictionary<string, object?>?>?> OnSelectedColumnsExport { get; set; }
-
+    [Parameter] public QuickGridWrapperEvents<TGridItem>? Events { get; set; }
     /// <summary>
     /// The number of items to display per page when pagination is enabled. The default value is 20.
     /// </summary>
@@ -285,13 +279,15 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     public bool QuickSearchAction(TGridItem item, string query)
         => QuickSearchUtility.QuickSearch(item, query, IsNestedSearch);
 
-    public Task ExportAsync() => OnExport.InvokeAsync(_filteredItems);
+    public Task ExportAsync() => Events?.OnExport.InvokeAsync(_filteredItems) ?? Task.CompletedTask;
 
     public async Task ExportSelectedColumnsAsync()
     {
+        if (Events is null) return;
+
         if (_filteredItems is null)
         {
-            await WarningRequested.InvokeAsync("No items to export.");
+            await Events.WarningRequested.InvokeAsync("No items to export.");
 
             return;
         }
@@ -304,7 +300,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
         if (visibleColumns.Count == 0)
         {
-            await WarningRequested.InvokeAsync("No columns to export. Contact Vaclav if this should be working.");
+            await Events.WarningRequested.InvokeAsync("No columns to export. Contact Vaclav if this should be working.");
 
             return;
         }
@@ -315,7 +311,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
             .Select(item => expandoHelper.Create(item, visibleColumns))
             .Where(obj => obj != null);
 
-        await OnSelectedColumnsExport.InvokeAsync(exportItems);
+        await Events.OnSelectedColumnsExport.InvokeAsync(exportItems);
     }
 
     public async Task RefreshDataAsync()
@@ -345,14 +341,16 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private async Task ManageColumns()
     {
+        if (Events is null) return;
+
         if (Id is null)
         {
-            await WarningRequested.InvokeAsync("Table ID is not set. Please set the ID parameter to enable this feature.");
+            await Events.WarningRequested.InvokeAsync("Table ID is not set. Please set the ID parameter to enable this feature.");
 
             return;
         }
 
-        await OnManageColumns.InvokeAsync();
+        await Events.OnManageColumns.InvokeAsync();
     }
 
     private async Task OnColumnSelectionChangedAsync(ColumnConfig? config = null)
@@ -385,7 +383,10 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
         //ColumnManager.ResetColumnVisibility();
 
-        await OnSelectView.InvokeAsync(config);
+        if (Events is not null)
+        {
+            await Events.OnSelectView.InvokeAsync(config);
+        }
 
         await OnColumnSelectionChangedAsync();
     }
@@ -401,9 +402,9 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
             column.Visible = _defaultVisibleColumns.Contains(column.FullTitle);
         }
 
-        if (Id != null)
+        if (Id != null && Events is not null)
         {
-            await OnResetViewToDefault.InvokeAsync();
+            await Events.OnResetViewToDefault.InvokeAsync();
         }
 
         await OnColumnSelectionChangedAsync();
