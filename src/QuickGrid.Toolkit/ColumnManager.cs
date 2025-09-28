@@ -36,6 +36,24 @@ public class ColumnManager<TGridItem>
         column.Id = Columns.Count;
     }
 
+    /// <summary>
+    /// Adds a collection of columns to the column manager, ensuring each column receives a correct sequential ID.
+    /// </summary>
+    /// <remarks>
+    /// <para>This method iterates through the provided columns and adds each one individually using the <see cref="Add(DynamicColumn{TGridItem}?)"/> method.
+    /// This ensures that each column gets properly initialized with the correct ID, title, and property name.</para>
+    /// <para><strong>Important:</strong> Do not use <c>Columns.AddRange</c> directly, as it bypasses the ID assignment logic and other initialization performed by the <see cref="Add(DynamicColumn{TGridItem}?)"/> method.</para>
+    /// </remarks>
+    /// <param name="columns">The collection of <see cref="DynamicColumn{TGridItem}"/> objects to add. Null columns in the collection are ignored.</param>
+    /// <seealso cref="Add(DynamicColumn{TGridItem}?)"/>
+    public void AddRange(IEnumerable<DynamicColumn<TGridItem>> columns)
+    {
+        foreach (var column in columns)
+        {
+            Add(column);
+        }
+    }
+
     public void AddSimple<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
         ColumnInfo columnInfo,
