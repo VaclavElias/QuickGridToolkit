@@ -14,7 +14,7 @@
                     if (IsColumnSelection)
                     {
                         <div class="dropdown me-2">
-                            <i class="fal fa-table-layout action me-2" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                            <span class="action me-2" data-bs-toggle="dropdown" aria-expanded="false">@IconProvider.Render(QuickGridIcon.ColumnLayout)</span>
                             <ul class="dropdown-menu">
                                 <li><button @onclick="ResetViewToDefault" class="dropdown-item"><i class="far @(_selectedConfiguration is null ? "fa-check" : "") text-success fa-fw me-1"></i> Default</button></li>
                                 @foreach (var item in _columnConfigurations)
@@ -26,7 +26,7 @@
                                     </li>
                                 }
                                 <li><hr class="dropdown-divider"></li>
-                                <li><button @onclick="ManageColumns" class="dropdown-item"><i class="fal fa-wrench fa-fw me-1"></i> Manage Columns</button></li>
+                                <li><button @onclick="ManageColumns" class="dropdown-item">@IconProvider.Render(QuickGridIcon.Wrench) Manage Columns</button></li>
                             </ul>
                         </div>
                     }

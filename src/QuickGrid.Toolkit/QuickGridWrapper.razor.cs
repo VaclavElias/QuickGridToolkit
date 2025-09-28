@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using QuickGrid.Toolkit.Core;
 using System.Text;
 
 namespace QuickGrid.Toolkit;
@@ -35,7 +35,13 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Parameter] public RenderFragment? FilterSection { get; set; }
 
     [Inject] protected IJSRuntime JS { get; set; } = default!;
+    [Inject] protected IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] protected ILogger<QuickGridWrapper<TGridItem>> Logger { get; set; } = default!;
+
+    // Resolve icon provider lazily with a safe default so the component doesn't throw if it's not registered in DI
+    private IQuickGridIconProvider? _iconProvider;
+    protected IQuickGridIconProvider IconProvider =>
+        _iconProvider ??= ServiceProvider.GetService<IQuickGridIconProvider>() ?? new DefaultQuickGridIconProvider();
 
     private const string ColumnTitleSetupErrorMessage = "Non-critical: Failed to setup column titles for {Id}. Application continues to run without this feature.";
 
