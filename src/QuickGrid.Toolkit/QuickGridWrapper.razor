@@ -1,0 +1,101 @@
+@typeparam TGridItem
+<div class="mx-2">
+    @if (IsLoading)
+    {
+        <img class="moving-element" src="/images/other/dancing-sticky-man.gif" height="20" style="margin-top:-9px" />
+        <span class="ms-3">Loading..</span>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between">
+            <div class="d-flex align-items-baseline">
+                @if (IsToolbar)
+                {
+                    if (IsColumnSelection)
+                    {
+                        <div class="dropdown me-2">
+                            <i class="fal fa-table-layout action me-2" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                            <ul class="dropdown-menu">
+                                <li><button @onclick="ResetViewToDefault" class="dropdown-item"><i class="far @(_selectedConfiguration is null ? "fa-check" : "") text-success fa-fw me-1"></i> Default</button></li>
+                                @foreach (var item in _columnConfigurations)
+                                {
+                                    <li>
+                                        <button @onclick="() => SelectView(item)" class="dropdown-item">
+                                            <i class="far @(item.Id == _selectedConfiguration?.Id ? "fa-check" : "") text-success fa-fw me-1"></i> @item.Name
+                                        </button>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button @onclick="ManageColumns" class="dropdown-item"><i class="fal fa-wrench fa-fw me-1"></i> Manage Columns</button></li>
+                            </ul>
+                        </div>
+                    }
+                    <div class="dropdown">
+                        <i class="fal fa-cog action me-2" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                        <ul class="dropdown-menu">
+                            <li><button class="dropdown-item" @onclick="ManageColumns"><i class="fal fa-wrench fa-fw me-1"></i> Manage Columns</button></li>
+                            @* <AuthorizeView Policy="@Policies.Other.PreviewFeature1">
+                            </AuthorizeView> *@
+                            @if (IsExportEnabled)
+                            {
+                                <li>
+                                    <button class="dropdown-item" @onclick="ExportAsync">
+                                        <i class="fal fa-download fa-fw me-1"></i> Export CSV
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" @onclick="ExportSelectedColumnsAsync">
+                                        <i class="fal fa-download fa-fw me-1"></i> Export CSV Selected Columns <span style="line-height:19px" class="px-1 ms-1 text-bg-warning small">Preview</span>
+                                    </button>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    @if (FilterSection != null && IsFilter)
+                    {
+                        <i @onclick="ToggleFilterSection" class="fal fa-filters action ms-1 me-2"></i>
+                    }
+                    @if (_isInMemorySearch)
+                    {
+                        <input @bind="_searchQuery" @bind:event="oninput" placeholder="quick search.." type="search" class="d-inline-block py-0 mb-1 ms-1 form-control form-control-sm border-0 quick-search" style="width: 200px" />
+                        if (!string.IsNullOrEmpty(_searchQuery))
+                        {
+                            <span class="small text-muted ms-2">(@_filteredItems?.Count()) Results</span>
+                        }
+                    }
+                    else
+                    {
+                        <input @bind:get="_searchQuery" @bind:set="(value) => SearchTextChanged(value)" placeholder="type & hit ENTER.." type="search" class="d-inline-block py-0 mb-1 ms-1 form-control form-control-sm border-0 me-1 quick-search" style="width: 200px" disabled="@IsLoading" />
+                        <button @onclick="ClearSearch" class="btn btn-primary btn-xs" disabled="@IsLoading">Clear Search</button>
+
+                    }
+                }
+                @if (IsSelection && _selectedItemsCount > 0)
+                {
+                    <div class="">
+                        <button @onclick="UnselectAllItems" class="btn btn-light btn-xs ms-4" type="button">Unselect All</button>
+                        <div class="dropdown d-inline-block ms-2">
+                            <button class="btn btn-success dropdown-toggle btn-xs" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @_selectedItemsCount SELECTED
+                            </button>
+                            <ul class="dropdown-menu">
+                                @SelectedItemsActionDropDown
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+@if (_showFilterSection)
+{
+    @FilterSection
+}
+<QuickGrid @ref="_grid" Items="@_filteredItems" Class="@GetTableClass()" Theme="twentyAI" Pagination="@_pagination" id="@Id" ItemKey="ItemKey">
+    @QuickGridColumns.Columns(_usedColumnManager)
+</QuickGrid>
+@if (IsPaginator)
+{
+    <Paginator State="@_pagination" />
+}
