@@ -1,17 +1,12 @@
-@page "/users-grid"
-<PageTitle>Users Grid</PageTitle>
-<h1>Users Grid</h1>
-<div class="my-3">
-    <ColumnSelector ColumnManager="_columnManager" SelectionChanged="SelectionChangedAsync" />
-</div>
-<QuickGrid @ref="_grid" Items="@_items.AsQueryable()" Class="table table-sm table-index table-striped small table-blazor table-fit table-thead-sticky mb-0" Theme="twentyAI">
-    @QuickGridColumns.Columns(_columnManager)
-</QuickGrid>
-
+@page "/users-grid-wrapper"
+<PageTitle>Users Grid Wrapper</PageTitle>
+<h1>Users Grid Wrapper</h1>
+<QuickGridWrapper
+    Items="@_items.AsQueryable()"
+    ColumnManager="_columnManager" />
 @code {
     private List<UserDto> _items = new();
     private ColumnManager<UserDto> _columnManager = new();
-    private QuickGrid<UserDto>? _grid;
 
     protected override void OnInitialized()
     {
@@ -24,13 +19,6 @@
         _columnManager.AddCountry();
 
         _items = UserService.GetUsers();
-    }
-
-    private async Task SelectionChangedAsync()
-    {
-        if (_grid is null) return;
-
-        await _grid.RefreshDataAsync();
     }
 
     private async Task ToggleChange(UserDto user)
