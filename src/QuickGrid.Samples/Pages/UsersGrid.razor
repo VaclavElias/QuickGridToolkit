@@ -4,7 +4,7 @@
 <div class="my-3">
     <ColumnSelector ColumnManager="_columnManager" SelectionChanged="SelectionChangedAsync" />
 </div>
-<QuickGrid @ref="_grid" Items="@_items.AsQueryable()" Class="table table-sm table-index table-striped small table-blazor table-fit table-thead-sticky mb-0" Theme="twentyAI">
+<QuickGrid @ref="_grid" Items="@_items.AsQueryable()" Class="table table-sm table-index table-striped small table-fit table-thead-sticky mb-0" Theme="twentyAI">
     @QuickGridColumns.Columns(_columnManager)
 </QuickGrid>
 
