@@ -12,7 +12,7 @@ public class QuickGridWrapperEvents<TGridItem>
 {
     public EventCallback<string> WarningRequested { get; set; }
     public EventCallback<ColumnConfig> OnSelectView { get; set; }
-    public EventCallback OnManageColumns { get; set; }
+    public EventCallback? OnManageColumns { get; set; }
     public EventCallback OnResetViewToDefault { get; set; }
     public EventCallback<IQueryable<TGridItem>> OnExport { get; set; }
     public EventCallback<IEnumerable<IDictionary<string, object?>?>?> OnSelectedColumnsExport { get; set; }
