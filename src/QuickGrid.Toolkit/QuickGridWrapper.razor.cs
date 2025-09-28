@@ -20,7 +20,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Parameter] public bool IsFilter { get; set; } = true;
     [Parameter] public bool IsToolbar { get; set; } = true;
     [Parameter] public bool IsNestedSearch { get; set; } = true;
-    [Parameter] public bool IsExportEnabled { get; set; } = true;
+    [Parameter] public bool IsExportEnabled { get; set; }
     [Parameter] public Func<TGridItem, object> ItemKey { get; set; } = x => x!;
     [Parameter] public EventCallback ColumnSelectionChanged { get; set; }
     [Parameter] public EventCallback<List<TGridItem>> SearchResultChanged { get; set; }
