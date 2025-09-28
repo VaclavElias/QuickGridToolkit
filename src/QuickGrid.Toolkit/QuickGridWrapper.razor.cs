@@ -17,6 +17,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public bool IsSelection { get; set; }
     [Parameter] public bool IsColumnSelection { get; set; } = true;
+    [Parameter] public bool IsColumnItemsSelection { get; set; }
     [Parameter] public bool IsFilter { get; set; } = true;
     [Parameter] public bool IsToolbar { get; set; } = true;
     [Parameter] public bool IsNestedSearch { get; set; } = true;
@@ -341,6 +342,11 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private async Task ManageColumns()
     {
+        if (Events is null && IsColumnSelection)
+        {
+            IsColumnItemsSelection = true;
+        }
+
         if (Events is null) return;
 
         if (Id is null)
