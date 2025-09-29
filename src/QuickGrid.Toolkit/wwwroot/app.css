@@ -32,6 +32,11 @@
     }
 }
 
+/* This is to allow custom td backgroud colour */
+.table-bg-transparent tbody td {
+    background-color: transparent;
+}
+
 .true-sign::after {
     content: "\2714";
     color: green;
