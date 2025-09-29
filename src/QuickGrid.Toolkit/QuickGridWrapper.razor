@@ -112,7 +112,7 @@
 <QuickGrid @ref="_grid" Items="@_filteredItems" Class="@GetTableClass()" Theme="twentyAI" Pagination="@_pagination" id="@Id" ItemKey="ItemKey">
     @QuickGridColumns.Columns(_usedColumnManager)
 </QuickGrid>
-@if (IsPaginator)
+@if (IsPaginator && _pagination != null)
 {
     <Paginator State="@_pagination" />
 }
