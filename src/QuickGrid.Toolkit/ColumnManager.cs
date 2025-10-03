@@ -1,15 +1,12 @@
+using QuickGrid.Toolkit.Builders;
+using QuickGrid.Toolkit.Helpers;
 using System.Globalization;
 
 namespace QuickGrid.Toolkit;
 
 public class ColumnManager<TGridItem>
 {
-    private const string MissingTitle = "Title n/a";
-    private const string NegativeDescription = "negative";
-    private const string PositiveDescription = "positive";
-    private const string ZeroDescription = "zero";
-    private const string UnknownDescription = "unknown";
-    private const string NoValueDescription = "no-value";
+    private readonly ColumnBuilder<TGridItem> _columnBuilder = new();
 
     public bool IsIndexColumn { get; set; } = true;
     public List<DynamicColumn<TGridItem>> Columns { get; } = [];
@@ -18,7 +15,6 @@ public class ColumnManager<TGridItem>
     /// <summary>
     /// Returns visible columns
     /// </summary>
-    /// <returns></returns>
     public IEnumerable<DynamicColumn<TGridItem>> Get() => Columns.Where(w => w.Visible);
 
     public void Add(DynamicColumn<TGridItem>? column = default)
@@ -26,10 +22,10 @@ public class ColumnManager<TGridItem>
         if (column == null) return;
 
         if (string.IsNullOrWhiteSpace(column.Title))
-            column.Title = GetPropertyName(column.Property) ?? MissingTitle;
+            column.Title = ExpressionHelper.GetPropertyName<TGridItem, object>(column.Property) ?? "Title n/a";
 
         if (string.IsNullOrEmpty(column.PropertyName))
-            column.PropertyName = GetPropertyNameNew(column.Property);
+            column.PropertyName = ExpressionHelper.GetSafePropertyName<TGridItem, object>(column.Property);
 
         Columns.Add(column);
 
@@ -68,11 +64,11 @@ public class ColumnManager<TGridItem>
     }
 
     /// <summary>
-    /// Adds a simple date column to the grid based on a specified expression.
-    /// /// </summary>
+    /// Adds a simple column to the grid based on a specified expression.
+    /// </summary>
     /// <param name="expression">An expression to determine the property of the grid item to display.</param>
     /// <param name="title">The title of the column. If null or whitespace, the property name is used.</param>
-    /// <param name="format">The date format string. Defaults to 'dd/MM/yyyy'.</param>
+    /// <param name="format">The format string for IFormattable values.</param>
     public void AddSimple<TValue>(
         Expression<Func<TGridItem, TValue?>> expression,
         string? title = null,
@@ -86,45 +82,8 @@ public class ColumnManager<TGridItem>
         string? propertyName = null,
         bool? addToContent = null)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, sortBy);
-
-        column.ChildContent = (item) => (builder) =>
-        {
-            if (item == null) return;
-
-            var value = expression.Compile().Invoke(item);
-
-            if (value is null)
-            {
-                builder.AddContent(0, string.Empty);
-            }
-            else
-            {
-                string displayValue;
-
-                if (value is IFormattable formattableValue)
-                    displayValue = formattableValue.ToString(format, CultureInfo.InvariantCulture);
-                else
-                    displayValue = $"{value}";
-
-                if (addToContent == true)
-                {
-                    builder.AddMarkupContent(0, $"<span content=\"{value}\">{displayValue}</span>");
-                }
-                else if (cellStyle != null)
-                {
-                    builder.AddMarkupContent(0, $"<span content=\"{cellStyle.GetStyle(value)}\">{displayValue}</span>");
-                }
-                else
-                {
-                    builder.AddContent(0, displayValue);
-                }
-            }
-        };
-
-        column.Visible = visible;
-        column.PropertyName = propertyName;
-
+        var column = _columnBuilder.BuildSimpleColumn(
+            expression, title, fullTitle, format, @class, align, cellStyle, sortBy, visible, propertyName, addToContent);
         Add(column);
     }
 
@@ -149,28 +108,8 @@ public class ColumnManager<TGridItem>
     public void AddAction(Expression<Func<TGridItem, object?>> expression, string? title = null, string? fullTitle = null, Align align = Align.Left, string? @class = null, GridSort<TGridItem>? sortBy = null,
         bool visible = true, Func<TGridItem, Task>? onClick = null, string? propertyName = null)
     {
-        var compiledExpression = expression.Compile();
-
-        Add(new()
-        {
-            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
-            FullTitle = fullTitle,
-            ChildContent = (item) => (builder) =>
-            {
-                var value = compiledExpression.Invoke(item);
-                builder.OpenElement(0, "div");
-                if (onClick is not null)
-                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
-                builder.AddContent(2, value);
-                builder.CloseElement();
-            },
-            SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(p => p == null ? default : compiledExpression.Invoke(p)),
-            ColumnType = typeof(TemplateColumn<TGridItem>),
-            Align = align,
-            Class = @class,
-            Visible = visible,
-            PropertyName = propertyName
-        });
+        var column = _columnBuilder.BuildActionColumn(expression, title, fullTitle, align, @class, sortBy, visible, onClick, propertyName);
+        Add(column);
     }
 
     public void AddAction(
@@ -180,21 +119,8 @@ public class ColumnManager<TGridItem>
         string? @class = null,
         Func<TGridItem, Task>? onClick = null)
     {
-        Add(new()
-        {
-            Title = title ?? "Action",
-            ChildContent = (item) => (builder) =>
-            {
-                builder.OpenElement(0, "div");
-                if (onClick != null)
-                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
-                builder.AddContent(2, staticContent);
-                builder.CloseElement();
-            },
-            ColumnType = typeof(TemplateColumn<TGridItem>),
-            Align = align,
-            Class = @class
-        });
+        var column = _columnBuilder.BuildStaticActionColumn(staticContent, title, align, @class, onClick);
+        Add(column);
     }
 
     public void AddAction(
@@ -205,24 +131,8 @@ public class ColumnManager<TGridItem>
         Action<TGridItem>? onClick = null,
         Expression<Func<TGridItem, bool>>? enabled = null)
     {
-        Add(new()
-        {
-            Title = title ?? "Action",
-            ChildContent = (item) => (builder) =>
-            {
-                if (enabled?.Compile().Invoke(item) != false)
-                {
-                    builder.OpenElement(0, "div");
-                    if (onClick != null)
-                        builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
-                    builder.AddContent(2, staticContent);
-                    builder.CloseElement();
-                }
-            },
-            ColumnType = typeof(TemplateColumn<TGridItem>),
-            Align = align,
-            Class = @class
-        });
+        var column = _columnBuilder.BuildConditionalActionColumn(staticContent, title, align, @class, onClick, enabled);
+        Add(column);
     }
 
     [Obsolete("Use AddNumber instead.", true)]
@@ -232,7 +142,7 @@ public class ColumnManager<TGridItem>
 
         Add(new()
         {
-            Title = string.IsNullOrWhiteSpace(title) ? GetPropertyName(expression) : title,
+            Title = string.IsNullOrWhiteSpace(title) ? ExpressionHelper.GetPropertyName<TGridItem, object>(expression) : title,
             ChildContent = (item) => (builder) =>
             {
                 var value = compiledExpression.Invoke(item);
@@ -258,19 +168,7 @@ public class ColumnManager<TGridItem>
     /// </summary>
     public void AddNumber(Expression<Func<TGridItem, decimal?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right, bool visible = true)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, visible: visible);
-
-        column.ChildContent = (item) => (builder) =>
-        {
-            if (item == null) return;
-
-            var value = expression.Compile().Invoke(item);
-
-            builder.AddContent(0, value?.ToString(format));
-        };
-
-        column.IsNumeric = true;
-
+        var column = _columnBuilder.BuildNumberColumn(expression, title, fullTitle, format, @class, align, visible);
         Add(column);
     }
 
@@ -279,19 +177,7 @@ public class ColumnManager<TGridItem>
     /// </summary>
     public void AddNumber(Expression<Func<TGridItem, double?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right, bool visible = true)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align, visible: visible);
-
-        column.ChildContent = (item) => (builder) =>
-        {
-            if (item == null) return;
-
-            var value = expression.Compile().Invoke(item);
-
-            builder.AddContent(0, value?.ToString(format));
-        };
-
-        column.IsNumeric = true;
-
+        var column = _columnBuilder.BuildNumberColumn(expression, title, fullTitle, format, @class, align, visible);
         Add(column);
     }
 
@@ -300,20 +186,7 @@ public class ColumnManager<TGridItem>
     /// </summary>
     public void AddNumber(Expression<Func<TGridItem, int?>> expression, string? title = null, string? fullTitle = null, string format = "N0", string? @class = null, Align align = Align.Right, string? propertyName = null)
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
-
-        column.ChildContent = (item) => (builder) =>
-        {
-            if (item == null) return;
-
-            var value = expression.Compile().Invoke(item);
-
-            builder.AddContent(0, value?.ToString(format));
-        };
-
-        column.IsNumeric = true;
-        column.PropertyName = propertyName;
-
+        var column = _columnBuilder.BuildNumberColumn(expression, title, fullTitle, format, @class, align, propertyName: propertyName);
         Add(column);
     }
 
@@ -339,125 +212,9 @@ public class ColumnManager<TGridItem>
         Func<TGridItem, Task>? onClick = null,
         string? propertyName = null) where TValue : struct, IFormattable
     {
-        DynamicColumn<TGridItem> column = BuildColumn(expression, title, fullTitle, @class, align);
-
-        column.ChildContent = (item) => (builder) =>
-        {
-            if (item == null) return;
-
-            var value = expression.Compile().Invoke(item);
-
-            if (value.HasValue)
-            {
-                string formattedValue = value.Value.ToString(format, CultureInfo.InvariantCulture);
-                string content = $"<span content=\"{DetermineNumericValueNature(value.Value, cellStyle)}\">{formattedValue}</span>";
-
-                if (onClick is null)
-                    builder.AddMarkupContent(0, content);
-                else
-                {
-                    builder.OpenElement(0, "div");
-                    builder.AddAttribute(1, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(item)));
-                    builder.AddMarkupContent(2, content);
-                    builder.CloseElement();
-                }
-            }
-            else
-            {
-                // Handle null case with cellStyle
-                var nullStyle = cellStyle?.GetStyle(default(TValue)) ?? string.Empty;
-                if (!string.IsNullOrEmpty(nullStyle))
-                {
-                    builder.AddMarkupContent(0, $"<span content=\"{nullStyle}\"></span>");
-                }
-                else
-                {
-                    builder.AddContent(0, string.Empty);
-                }
-            }
-        };
-
-        column.Visible = visible;
-        column.IsNumeric = true;
-        column.PropertyName = propertyName;
-
+        var column = _columnBuilder.BuildStyledNumberColumn(
+            expression, title, fullTitle, format, @class, align, visible, cellStyle, onClick, propertyName);
         Add(column);
-    }
-
-    private static DynamicColumn<TGridItem> BuildColumn<TValue>(Expression<Func<TGridItem, TValue?>> expression, string? title, string? fullTitle = null, string? @class = null, Align align = Align.Left, GridSort<TGridItem>? sortBy = null, bool visible = true) => new()
-    {
-        Title = title ?? GetPropertyName(expression),
-        SortBy = sortBy ?? GridSort<TGridItem>.ByAscending(expression),
-        ColumnType = typeof(TemplateColumn<TGridItem>),
-        Align = align,
-        FullTitle = fullTitle,
-        Class = @class,
-        Visible = visible,
-        Property = ConvertExpressionToObject(expression)
-    };
-
-    private static Expression<Func<TGridItem, object?>> ConvertExpressionToObject<TValue>(
-        Expression<Func<TGridItem, TValue?>> expression)
-    {
-        // Check if the body's result type is already object to avoid unnecessary conversion
-        if (typeof(TValue) == typeof(object))
-            // Safe to return as is because TValue is object. However, we need to handle nullable conversion.
-            return expression as Expression<Func<TGridItem, object?>>
-                   ?? throw new InvalidOperationException("Failed to convert expression.");
-
-        // Prepare a conversion of the expression's body to object?
-        var body = expression.Body;
-
-        // Handle nullable value types by converting to object
-        if (typeof(TValue).IsValueType)
-            body = Expression.Convert(body, typeof(object));
-
-        // Rebuild the lambda expression with the converted body
-        var convertedExpression = Expression.Lambda<Func<TGridItem, object?>>(body, expression.Parameters);
-
-        return convertedExpression;
-    }
-
-    private static string DetermineNumericValueNature<TValue>(TValue? value, CellStyleMap<TValue>? cellStyle = null) where TValue : struct
-    {
-        // First check for custom styling
-        if (cellStyle != null)
-        {
-            if (value.HasValue && cellStyle.ContainsValue(value.Value))
-            {
-                return cellStyle.GetStyle(value.Value);
-            }
-            if (!value.HasValue && cellStyle.ContainsValue(default(TValue)))
-            {
-                return cellStyle.GetStyle(default(TValue));
-            }
-        }
-
-        // Default numeric value nature determination
-        switch (value)
-        {
-            case null:
-                return NoValueDescription;
-            case int intValue when intValue < 0:
-            case decimal decimalValue when decimalValue < 0:
-            case double doubleValue when doubleValue < 0:
-                return NegativeDescription;
-            case int intValue when intValue > 0:
-            case decimal decimalValue when decimalValue > 0:
-            case double doubleValue when doubleValue > 0:
-                return PositiveDescription;
-            case int intValue when intValue == 0:
-            case decimal decimalValue when decimalValue == 0:
-            case double doubleValue when doubleValue == 0:
-                return ZeroDescription;
-            default:
-                return UnknownDescription;
-        }
-    }
-
-    private static string DetermineValueStyling<TValue>(TValue? value, CellStyleMap<TValue>? cellStyle = null)
-    {
-        return cellStyle?.GetStyle(value) ?? string.Empty;
     }
 
     public void AddTickColumn(
@@ -621,63 +378,5 @@ public class ColumnManager<TGridItem>
             return formattableValue.ToString(format, CultureInfo.InvariantCulture);
         else
             return $"{value}";
-    }
-
-    private static string? GetPropertyName<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
-    {
-        if (expression is null) return null;
-
-        MemberExpression? memberExpression;
-
-        if (expression.Body is UnaryExpression unaryExpression)
-            memberExpression = unaryExpression.Operand as MemberExpression;
-        else
-            memberExpression = expression.Body as MemberExpression;
-
-        if (memberExpression == null)
-            throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
-
-        if (!(memberExpression.Member is PropertyInfo propertyInfo))
-            throw new ArgumentException($"Expression '{expression}' refers to a field, not a property.");
-
-        return propertyInfo.Name;
-    }
-
-    private static string? GetPropertyNameNew<TValue>(Expression<Func<TGridItem, TValue?>>? expression)
-    {
-        if (expression is null) return null;
-
-        Expression body = expression.Body;
-
-        while (body is UnaryExpression unaryExpression1)
-            body = unaryExpression1.Operand;
-
-        if (body is MemberExpression memberExpression1 && memberExpression1.Member is PropertyInfo propertyInfo1)
-            return propertyInfo1.Name;
-
-        // Handle more complex expressions by extracting property references
-        var propertyVisitor = new PropertyReferenceVisitor();
-
-        propertyVisitor.Visit(expression);
-
-        if (propertyVisitor.PropertyNames.Count > 0)
-            return string.Join("_", propertyVisitor.PropertyNames);
-
-        // If we couldn't extract any property, generate a safe name based on the expression
-        return $"Expr_{Math.Abs(expression.ToString().GetHashCode())}";
-    }
-
-    // Helper class to extract property names from expressions
-    private class PropertyReferenceVisitor : ExpressionVisitor
-    {
-        public List<string> PropertyNames { get; } = [];
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            if (node.Member is PropertyInfo propertyInfo)
-                PropertyNames.Add(propertyInfo.Name);
-
-            return base.VisitMember(node);
-        }
     }
 }

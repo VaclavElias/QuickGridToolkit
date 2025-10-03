@@ -3,7 +3,7 @@ namespace QuickGrid.Toolkit.Helpers;
 /// <summary>
 /// Provides utility methods for working with expressions, particularly for extracting property names.
 /// </summary>
-internal static class ExpressionHelper
+public static class ExpressionHelper
 {
     /// <summary>
     /// Extracts the property name from a simple property access expression.
@@ -57,7 +57,9 @@ internal static class ExpressionHelper
         propertyVisitor.Visit(expression);
 
         if (propertyVisitor.PropertyNames.Count > 0)
+        {
             return string.Join("_", propertyVisitor.PropertyNames);
+        }
 
         // If we couldn't extract any property, generate a safe name based on the expression
         return $"Expr_{Math.Abs(expression.ToString().GetHashCode())}";
@@ -96,14 +98,16 @@ internal static class ExpressionHelper
     }
 
     // Helper class to extract property names from expressions
-    private class PropertyReferenceVisitor : ExpressionVisitor
+    private sealed class PropertyReferenceVisitor : ExpressionVisitor
     {
         public List<string> PropertyNames { get; } = [];
 
         protected override Expression VisitMember(MemberExpression node)
         {
             if (node.Member is PropertyInfo propertyInfo)
+            {
                 PropertyNames.Add(propertyInfo.Name);
+            }
 
             return base.VisitMember(node);
         }

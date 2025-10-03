@@ -3,7 +3,7 @@ namespace QuickGrid.Toolkit.Helpers;
 /// <summary>
 /// Provides utility methods for determining cell styling based on values.
 /// </summary>
-internal static class CellStyleHelper
+public static class CellStyleHelper
 {
     private const string NegativeDescription = "negative";
     private const string PositiveDescription = "positive";

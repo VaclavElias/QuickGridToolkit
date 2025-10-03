@@ -7,7 +7,7 @@ namespace QuickGrid.Toolkit.Builders;
 /// Provides methods to build different types of columns for QuickGrid.
 /// </summary>
 /// <typeparam name="TGridItem">The type of items in the grid.</typeparam>
-internal class ColumnBuilder<TGridItem>
+public class ColumnBuilder<TGridItem>
 {
     private const string MissingTitle = "Title n/a";
 
