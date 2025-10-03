@@ -1,4 +1,4 @@
-namespace QuickGrid.Toolkit;
+namespace QuickGrid.Toolkit.Core;
 
 /// <summary>
 /// Represents a cell style mapping for a specific value.

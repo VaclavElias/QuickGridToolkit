@@ -1,4 +1,4 @@
-namespace QuickGrid.Toolkit;
+namespace QuickGrid.Toolkit.Core;
 
 /// <summary>
 /// Provides styling mappings for cell values, including support for null values.
