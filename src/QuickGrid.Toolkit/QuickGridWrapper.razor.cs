@@ -40,6 +40,10 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] protected ILogger<QuickGridWrapper<TGridItem>> Logger { get; set; } = default!;
 
+    public List<ColumnConfig> ColumnConfigurations { get; set; } = [];
+    public ColumnManager<TGridItem> UsedColumnManager { get; set; } = new();
+    public ColumnConfig? SelectedConfiguration { get; set; }
+
     // Resolve icon provider lazily with a safe default so the component doesn't throw if it's not registered in DI
     private IQuickGridIconProvider? _iconProvider;
     protected IQuickGridIconProvider IconProvider =>
@@ -58,13 +62,10 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private QuickGrid<TGridItem>? _grid;
     private PaginationState? _pagination;
-    private ColumnConfig? _selectedConfiguration;
     private ColumnManager<TGridItem> _defaultColumnManager = new();
-    private ColumnManager<TGridItem> _usedColumnManager = new();
 
     private List<string> _defaultVisibleColumns = [];
     private List<TGridItem>? _evaluatedItems;
-    private List<ColumnConfig> _columnConfigurations = [];
     private readonly List<FooterColumn<TGridItem>> _footerColumns = [];
 
     private int _selectedItemsCount => _filteredItems?.Count(item => (ISelectionDto?)item != null && ((ISelectionDto?)item)!.IsSelected) ?? 0;
@@ -130,7 +131,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     {
         if (Id is null || _titlesLoaded) return;
 
-        if (_usedColumnManager.Columns.Count > 0)
+        if (UsedColumnManager.Columns.Count > 0)
         {
             await RefreshColumnTitlesAsync();
 
@@ -170,9 +171,9 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     public async Task RefreshColumnTitlesAsync()
     {
-        if (!_usedColumnManager.Columns.Any(w => w.Visible)) return;
+        if (!UsedColumnManager.Columns.Any(w => w.Visible)) return;
 
-        var titles = _usedColumnManager.Columns.Where(w => w.Visible).Select(col => col.FullTitle).ToList();
+        var titles = UsedColumnManager.Columns.Where(w => w.Visible).Select(col => col.FullTitle).ToList();
 
         try
         {
@@ -186,7 +187,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     public async ValueTask AddOrUpdateFooterAsync()
     {
-        if (Id is null || _usedColumnManager.FooterColumns.Count == 0) return;
+        if (Id is null || UsedColumnManager.FooterColumns.Count == 0) return;
 
         await JS.InvokeVoidAsync("addOrUpdateFooter", Id, GenerateTableFooterWithTotals());
     }
@@ -195,14 +196,14 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     {
         InitializeDefaultColumnVisibility();
 
-        _selectedConfiguration = _columnConfigurations.FirstOrDefault(w => w.Default);
+        SelectedConfiguration = ColumnConfigurations.FirstOrDefault(w => w.Default);
 
-        if (_selectedConfiguration != null)
+        if (SelectedConfiguration != null)
         {
-            SetColumnVisibility(_selectedConfiguration);
+            SetColumnVisibility(SelectedConfiguration);
         }
 
-        _usedColumnManager = _defaultColumnManager;
+        UsedColumnManager = _defaultColumnManager;
 
         //StateHasChanged();
 
@@ -228,9 +229,9 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     {
         StringBuilder html = new();
 
-        foreach (var column in _usedColumnManager.Columns.Where(w => w.Visible && w.Class != "d-none"))
+        foreach (var column in UsedColumnManager.Columns.Where(w => w.Visible && w.Class != "d-none"))
         {
-            var footerColumn = _usedColumnManager.FooterColumns.FirstOrDefault(w => w.Id == column.Id);
+            var footerColumn = UsedColumnManager.FooterColumns.FirstOrDefault(w => w.Id == column.Id);
 
             if (footerColumn is null)
             {
@@ -301,7 +302,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
             return;
         }
 
-        var visibleColumns = _usedColumnManager.Columns
+        var visibleColumns = UsedColumnManager.Columns
             .Where(w => w.Visible && w.PropertyName != null)
             .Select(s => s.PropertyName!)
             .Distinct()
@@ -330,7 +331,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     public void SetTableIndex()
     {
-        _isTableIndex = _usedColumnManager.Columns.Where(w => w.Visible).Any(x => x.Title == "#") && _usedColumnManager.IsIndexColumn;
+        _isTableIndex = UsedColumnManager.Columns.Where(w => w.Visible).Any(x => x.Title == "#") && UsedColumnManager.IsIndexColumn;
     }
 
     private void UnselectAllItems()
@@ -369,7 +370,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
     {
         if (config != null)
         {
-            _selectedConfiguration = config;
+            SelectedConfiguration = config;
         }
 
         if (ColumnSelectionChanged.HasDelegate)
@@ -387,9 +388,9 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private async Task SelectView(ColumnConfig config)
     {
-        _selectedConfiguration = config;
+        SelectedConfiguration = config;
 
-        SetColumnVisibility(_selectedConfiguration);
+        SetColumnVisibility(SelectedConfiguration);
 
         //ColumnManager.SetVisibleColumns(config.ColumnSelections.Select(s => s.ColumnName));
 
@@ -405,7 +406,7 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private async void ResetViewToDefault()
     {
-        _selectedConfiguration = null;
+        SelectedConfiguration = null;
 
         foreach (var column in _defaultColumnManager.Columns)
         {

@@ -18,7 +18,7 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <button @onclick="ResetViewToDefault" class="dropdown-item">
-                                        @if (_selectedConfiguration is null)
+                                        @if (SelectedConfiguration is null)
                                         {
                                             @IconProvider.Render(QuickGridIcon.Tick)
                                         } else
@@ -27,11 +27,11 @@
                                         }<span>Default</span>
                                     </button>
                                 </li>
-                                @foreach (var item in _columnConfigurations)
+                                @foreach (var item in ColumnConfigurations)
                                 {
                                     <li>
                                         <button @onclick="() => SelectView(item)" class="dropdown-item">
-                                            @if (item.Id == _selectedConfiguration?.Id)
+                                            @if (item.Id == SelectedConfiguration?.Id)
                                             {
                                                 @IconProvider.Render(QuickGridIcon.Tick)
                                             }
@@ -109,7 +109,7 @@
     @FilterSection
 }
 <QuickGrid @ref="_grid" Items="@_filteredItems" Class="@GetTableClass()" Theme="twentyAI" Pagination="@_pagination" id="@Id" ItemKey="ItemKey">
-    @QuickGridColumns.Columns(_usedColumnManager)
+    @QuickGridColumns.Columns(UsedColumnManager)
 </QuickGrid>
 @if (IsPaginator && _pagination != null)
 {
