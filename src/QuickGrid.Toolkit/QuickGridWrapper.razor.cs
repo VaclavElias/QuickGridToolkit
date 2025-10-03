@@ -58,13 +58,13 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
 
     private QuickGrid<TGridItem>? _grid;
     private PaginationState? _pagination;
-    public ColumnConfig? _selectedConfiguration;
+    private ColumnConfig? _selectedConfiguration;
     private ColumnManager<TGridItem> _defaultColumnManager = new();
-    public ColumnManager<TGridItem> _usedColumnManager = new();
+    private ColumnManager<TGridItem> _usedColumnManager = new();
 
     private List<string> _defaultVisibleColumns = [];
     private List<TGridItem>? _evaluatedItems;
-    public List<ColumnConfig> _columnConfigurations = [];
+    private List<ColumnConfig> _columnConfigurations = [];
     private readonly List<FooterColumn<TGridItem>> _footerColumns = [];
 
     private int _selectedItemsCount => _filteredItems?.Count(item => (ISelectionDto?)item != null && ((ISelectionDto?)item)!.IsSelected) ?? 0;
@@ -314,10 +314,8 @@ public partial class QuickGridWrapper<TGridItem> : ComponentBase, IDisposable
             return;
         }
 
-        var expandoHelper = new ExpandoObjectBuilder<TGridItem>();
-
         var exportItems = _filteredItems.ToList()
-            .Select(item => expandoHelper.Create(item, visibleColumns))
+            .Select(item => ExpandoObjectBuilder<TGridItem>.Create(item, visibleColumns))
             .Where(obj => obj != null);
 
         await Events.OnSelectedColumnsExport.InvokeAsync(exportItems);

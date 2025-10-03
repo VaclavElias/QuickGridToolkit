@@ -2,7 +2,7 @@ using System.Dynamic;
 
 namespace QuickGrid.Toolkit.Core;
 
-public class ExpandoObjectBuilder<TGridItem>
+public static class ExpandoObjectBuilder<TGridItem>
 {
     /// <summary>
     /// Creates an ExpandoObject with properties extracted from an item based on the provided column names.
@@ -10,7 +10,7 @@ public class ExpandoObjectBuilder<TGridItem>
     /// <param name="item">The item to extract properties from.</param>
     /// <param name="columnNames">List of property names to extract.</param>
     /// <returns>An ExpandoObject with the extracted properties, or null if the item is null.</returns>
-    public IDictionary<string, object?>? Create(TGridItem? item, List<string> columnNames)
+    public static IDictionary<string, object?>? Create(TGridItem? item, List<string> columnNames)
     {
         if (item is null) return null;
 
