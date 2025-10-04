@@ -22,6 +22,8 @@ QuickGrid.Toolkit extends the Blazor QuickGrid with reusable, dynamic column man
     - ⏳ Example
   - ⏳ Export to CSV and Json
     - ⏳ Example
+  - ✅ Search across all columns
+    - ✅ Example in `QuickGridWrapper`
 - QuickGrid.Samples: a demo app showcasing the toolkit (see the Users pages)
 
 ## Requirements
