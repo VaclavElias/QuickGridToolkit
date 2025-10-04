@@ -8,9 +8,20 @@ QuickGrid.Toolkit extends the Blazor QuickGrid with reusable, dynamic column man
   - ✅ Predefined, strongly-typed helpers (e.g., `AddCountry()`)
   - ✅ Sorting support for added columns
   - ✅ Utility CSS classes: `table-index`, `table-fit`, `table-thead-sticky`
-  - ⏳ Custom `ImageColumn`
-  - ⏳ Custom `TickColumn`
-  - ⏳ Clickable columns with callbacks
+  - ✅ Custom `ImageColumn`
+    - ⏳ Example
+  - ✅ Custom `TickColumn`
+    - ⏳ Example
+  - ✅ Custom `ToggleColumn`
+    - ⏳ Example
+  - ✅ Clickable columns with callbacks
+    - ⏳ Example
+  - ✅ Custom column styling
+    - ⏳ Example
+  - ✅ Custom row styling
+    - ⏳ Example
+  - ⏳ Export to CSV and Json
+    - ⏳ Example
 - QuickGrid.Samples: a demo app showcasing the toolkit (see the Users pages)
 
 ## Requirements
